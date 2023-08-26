@@ -1,0 +1,27 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is api document for APP API project.",
+        "title": "APP API DOCUMENT",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "Andy",
+            "url": "https://d.foundation",
+            "email": "andy@d.foundation"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "v0.0.1"
+    },
+    "basePath": "/api/v1",
+    "paths": {},
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

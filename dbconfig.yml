@@ -1,0 +1,11 @@
+development:
+  dialect: postgres
+  datasource: user=postgres password=postgres dbname=go-api-db sslmode=disable
+
+test:
+  dialect: postgres
+  datasource: user=postgres password=postgres port=5433 dbname=go-api-db-test sslmode=disable
+
+prod:
+  dialect: postgres
+  datasource: host=localhost dbname=${DB_NAME} user=${DB_USER} password=${DB_PASSWORD} sslmode=disable

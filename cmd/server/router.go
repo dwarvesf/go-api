@@ -53,7 +53,7 @@ func setupRouter(a App, sClient *sentry.Client) *gin.Engine {
 }
 
 func publicHandler(r *gin.Engine, a App) {
-	h := handler.New(a.cfg)
+	h := handler.New(*a.cfg)
 
 	r.GET("/healthz", h.Healthz)
 

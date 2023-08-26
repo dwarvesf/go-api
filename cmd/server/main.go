@@ -14,9 +14,9 @@ import (
 	"github.com/dwarvesf/go-api/pkg/service"
 )
 
-// @title           SCC API DOCUMENT
+// @title           APP API DOCUMENT
 // @version         v0.0.1
-// @description     This is api document for scc guess project.
+// @description     This is api document for APP API project.
 // @termsOfService  http://swagger.io/terms/
 
 // @contact.name   Andy
@@ -44,6 +44,11 @@ func main() {
 	l := logger.NewLogByConfig(cfg, sClient)
 	l.Infof("Server starting")
 
+	a := App{
+		l:   l,
+		cfg: cfg,
+	}
+
 	// Server
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", cfg.Port),
@@ -54,7 +59,7 @@ func main() {
 
 	// serve http server
 	go func() {
-		a.l.Info("listening on " + a.cfg.APIServer.Port)
+		a.l.Info("listening on " + a.cfg.Port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal(err, "failed to listen and serve")
 		}
@@ -81,6 +86,6 @@ func shutdownServer(srv *http.Server, l logger.Log) {
 // App api app instance
 type App struct {
 	l       logger.Log
-	cfg     config.Config
+	cfg     *config.Config
 	service service.Service
 }

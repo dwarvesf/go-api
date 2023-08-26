@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: go-api-db
+    environment:
+      POSTGRES_DB: go-api-db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - go-api-network
+    volumes:
+      - go-api-data:/var/lib/postgresql/data
+
+  db-test:
+    image: postgres:latest
+    container_name: go-api-db-test
+    environment:
+      POSTGRES_DB: go-api-db-test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"  # Map to a different port to avoid conflicts with dev DB
+    networks:
+      - go-api-network
+    volumes:
+      - go-api-data-test:/var/lib/postgresql/data
+
+networks:
+  go-api-network:
+
+volumes:
+  go-api-data:
+  go-api-data-test:
