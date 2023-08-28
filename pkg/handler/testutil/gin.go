@@ -2,12 +2,14 @@ package testutil
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 
+	"github.com/dwarvesf/go-api/pkg/mw"
 	"github.com/gin-gonic/gin"
 )
 
@@ -79,4 +81,12 @@ func NewRequest(w *httptest.ResponseRecorder, method HttpMethod, headers map[str
 	}
 
 	return ctx
+}
+
+// UpdateJWT update the jwt token
+func UpdateJWT(ginCtx *gin.Context, userID int, role string) {
+
+	ctx := context.WithValue(ginCtx.Request.Context(), mw.UserIDCtxKey, userID)
+	ctx = context.WithValue(ctx, mw.RoleCtxKey, role)
+	ginCtx.Request = ginCtx.Request.WithContext(ctx)
 }

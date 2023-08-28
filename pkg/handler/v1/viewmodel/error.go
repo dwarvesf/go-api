@@ -11,7 +11,7 @@ type ErrorResponse struct {
 	Status  int    `json:"status" validate:"required"`
 	Code    string `json:"code" validate:"required"`
 	Message string `json:"message" validate:"required"`
-}
+} // @name ErrorResponse
 
 func (e ErrorResponse) Error() string {
 	return e.Message
