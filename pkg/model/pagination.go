@@ -7,4 +7,5 @@ type Pagination struct {
 	TotalRecords int
 	TotalPages   int
 	Offset       int
+	Sort         string
 }

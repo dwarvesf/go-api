@@ -1,9 +1,12 @@
 package view
 
 // MessageResponse is the response for message
-type MessageResponse struct {
+type MessageResponse = Response[Message] // @name MessageResponse
+
+// Message is the message
+type Message struct {
 	Message string `json:"message" validate:"required"`
-} // @name MessageResponse
+} // @name Message
 
 // Response is the response for data
 type Response[T any] struct {

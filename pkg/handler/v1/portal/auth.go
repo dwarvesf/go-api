@@ -76,5 +76,9 @@ func (h Handler) Signup(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, view.MessageResponse{Message: "OK"})
+	c.JSON(http.StatusCreated, view.MessageResponse{
+		Data: view.Message{
+			Message: "success",
+		},
+	})
 }

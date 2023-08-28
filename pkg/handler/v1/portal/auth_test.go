@@ -154,8 +154,12 @@ func TestHandler_Signup(t *testing.T) {
 				},
 			},
 			expected: expected{
-				Status: http.StatusOK,
-				Body:   view.MessageResponse{Message: "OK"},
+				Status: http.StatusCreated,
+				Body: view.MessageResponse{
+					Data: view.Message{
+						Message: "success",
+					},
+				},
 			},
 		},
 	}
