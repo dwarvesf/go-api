@@ -82,6 +82,26 @@ definitions:
       data:
         $ref: '#/definitions/Message'
     type: object
+  Metadata:
+    properties:
+      hasNext:
+        type: boolean
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      sort:
+        type: string
+      totalPages:
+        type: integer
+      totalRecords:
+        type: integer
+    required:
+    - page
+    - pageSize
+    - totalPages
+    - totalRecords
+    type: object
   SignupRequest:
     properties:
       avatar:
@@ -120,17 +140,43 @@ definitions:
     properties:
       avatar:
         type: string
+      department:
+        type: string
       email:
         type: string
       fullName:
         type: string
       id:
         type: integer
+      role:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
     required:
     - avatar
+    - department
     - email
     - fullName
     - id
+    - role
+    - status
+    - title
+    type: object
+  UserResponse:
+    properties:
+      data:
+        $ref: '#/definitions/User'
+    type: object
+  UsersListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/User'
+        type: array
+      metadata:
+        $ref: '#/definitions/Metadata'
     type: object
 info:
   contact:
@@ -150,6 +196,7 @@ paths:
       consumes:
       - application/json
       description: Login to portal by email
+      operationId: login
       parameters:
       - description: Body
         in: body
@@ -184,6 +231,7 @@ paths:
       consumes:
       - application/json
       description: Signup
+      operationId: signup
       parameters:
       - description: Body
         in: body
@@ -218,6 +266,7 @@ paths:
       consumes:
       - application/json
       description: Retrieve my information
+      operationId: getMe
       produces:
       - application/json
       responses:
@@ -243,10 +292,49 @@ paths:
       tags:
       - User
   /portal/users:
+    get:
+      consumes:
+      - application/json
+      description: get users list
+      operationId: getUsersList
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/UsersListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get users list
+      tags:
+      - User
     put:
       consumes:
       - application/json
       description: Update user
+      operationId: updateUser
       parameters:
       - description: Update user
         in: body
@@ -260,7 +348,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/UserResponse'
         "400":
           description: Bad Request
           schema:
@@ -283,6 +371,7 @@ paths:
       consumes:
       - application/json
       description: Update user's password
+      operationId: updatePassword
       parameters:
       - description: Update user
         in: body

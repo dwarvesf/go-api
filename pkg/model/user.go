@@ -42,4 +42,6 @@ type User struct {
 	Status         string
 	Avatar         string
 	Role           string
+	Title          string
+	Department     string
 }

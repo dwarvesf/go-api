@@ -38,6 +38,7 @@ const docTemplate = `{
                     "Auth"
                 ],
                 "summary": "Login to portal",
+                "operationId": "login",
                 "parameters": [
                     {
                         "description": "Body",
@@ -90,6 +91,7 @@ const docTemplate = `{
                     "Auth"
                 ],
                 "summary": "Signup",
+                "operationId": "signup",
                 "parameters": [
                     {
                         "description": "Body",
@@ -147,6 +149,7 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "Retrieve my information",
+                "operationId": "getMe",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -176,6 +179,65 @@ const docTemplate = `{
             }
         },
         "/portal/users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "get users list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get users list",
+                "operationId": "getUsersList",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UsersListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            },
             "put": {
                 "security": [
                     {
@@ -193,6 +255,7 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "Update user",
+                "operationId": "updateUser",
                 "parameters": [
                     {
                         "description": "Update user",
@@ -208,7 +271,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/User"
+                            "$ref": "#/definitions/UserResponse"
                         }
                     },
                     "400": {
@@ -250,6 +313,7 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "Update user's password",
+                "operationId": "updatePassword",
                 "parameters": [
                     {
                         "description": "Update user",
@@ -415,6 +479,35 @@ const docTemplate = `{
                 }
             }
         },
+        "Metadata": {
+            "type": "object",
+            "required": [
+                "page",
+                "pageSize",
+                "totalPages",
+                "totalRecords"
+            ],
+            "properties": {
+                "hasNext": {
+                    "type": "boolean"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "string"
+                },
+                "totalPages": {
+                    "type": "integer"
+                },
+                "totalRecords": {
+                    "type": "integer"
+                }
+            }
+        },
         "SignupRequest": {
             "type": "object",
             "required": [
@@ -470,12 +563,19 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "avatar",
+                "department",
                 "email",
                 "fullName",
-                "id"
+                "id",
+                "role",
+                "status",
+                "title"
             ],
             "properties": {
                 "avatar": {
+                    "type": "string"
+                },
+                "department": {
                     "type": "string"
                 },
                 "email": {
@@ -486,6 +586,37 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "UserResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/User"
+                }
+            }
+        },
+        "UsersListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/User"
+                    }
+                },
+                "metadata": {
+                    "$ref": "#/definitions/Metadata"
                 }
             }
         }

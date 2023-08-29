@@ -83,6 +83,7 @@ func authenticatedHandler(r *gin.Engine, a App) {
 		portalHandler := portal.New(*a.cfg, a.l, a.repo, a.service)
 		portalGroup.GET("/me", portalHandler.Me)
 		portalGroup.PUT("/users", portalHandler.UpdateUser)
+		portalGroup.GET("/users", portalHandler.GetUsersList)
 		portalGroup.PUT("/users/password", portalHandler.UpdatePassword)
 	}
 }

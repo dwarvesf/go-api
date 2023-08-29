@@ -15,6 +15,7 @@ import (
 // @Tags Auth
 // @Accept  json
 // @Produce  json
+// @ID login
 // @Param Body body LoginRequest true "Body"
 // @Success 200 {object} LoginResponse
 // @Failure 400 {object} ErrorResponse
@@ -50,6 +51,7 @@ func (h Handler) Login(c *gin.Context) {
 // Signup godoc
 // @Summary Signup
 // @Description Signup
+// @ID signup
 // @Tags Auth
 // @Accept  json
 // @Produce  json

@@ -14,6 +14,7 @@ type Controller interface {
 	UpdateUser(ctx context.Context, user model.UpdateUserRequest) (*model.User, error)
 	UpdatePassword(ctx context.Context, user model.UpdatePasswordRequest) error
 	SentMail(ctx context.Context) error
+	UserList(ctx context.Context, req model.ListQuery) (*model.ListResult[model.User], error)
 }
 
 type impl struct {

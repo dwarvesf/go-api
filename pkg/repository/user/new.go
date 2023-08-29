@@ -35,5 +35,7 @@ func toUserModel(user *orm.User) *model.User {
 		HashedPassword: user.HashedPassword,
 		Role:           user.Role,
 		Salt:           user.Salt,
+		Title:          user.Title,
+		Department:     user.Department,
 	}
 }

@@ -216,6 +216,61 @@ func (_c *Controller_UpdateUser_Call) RunAndReturn(run func(context.Context, mod
 	return _c
 }
 
+// UserList provides a mock function with given fields: ctx, req
+func (_m *Controller) UserList(ctx context.Context, req model.ListQuery) (*model.ListResult[model.User], error) {
+	ret := _m.Called(ctx, req)
+
+	var r0 *model.ListResult[model.User]
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, model.ListQuery) (*model.ListResult[model.User], error)); ok {
+		return rf(ctx, req)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, model.ListQuery) *model.ListResult[model.User]); ok {
+		r0 = rf(ctx, req)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.ListResult[model.User])
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, model.ListQuery) error); ok {
+		r1 = rf(ctx, req)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Controller_UserList_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UserList'
+type Controller_UserList_Call struct {
+	*mock.Call
+}
+
+// UserList is a helper method to define mock.On call
+//   - ctx context.Context
+//   - req model.ListQuery
+func (_e *Controller_Expecter) UserList(ctx interface{}, req interface{}) *Controller_UserList_Call {
+	return &Controller_UserList_Call{Call: _e.mock.On("UserList", ctx, req)}
+}
+
+func (_c *Controller_UserList_Call) Run(run func(ctx context.Context, req model.ListQuery)) *Controller_UserList_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(model.ListQuery))
+	})
+	return _c
+}
+
+func (_c *Controller_UserList_Call) Return(_a0 *model.ListResult[model.User], _a1 error) *Controller_UserList_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *Controller_UserList_Call) RunAndReturn(run func(context.Context, model.ListQuery) (*model.ListResult[model.User], error)) *Controller_UserList_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewController creates a new instance of Controller. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewController(t interface {
