@@ -10,6 +10,7 @@ import (
 	"github.com/dwarvesf/go-api/pkg/handler/testutil"
 	"github.com/dwarvesf/go-api/pkg/handler/v1/view"
 	"github.com/dwarvesf/go-api/pkg/logger"
+	"github.com/dwarvesf/go-api/pkg/model"
 	"github.com/dwarvesf/go-api/pkg/repository/orm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -21,7 +22,7 @@ func TestHandler_Me(t *testing.T) {
 		userID       int
 		role         string
 		expGetUser   bool
-		user         *orm.User
+		user         *model.User
 		userErr      error
 	}
 
@@ -40,8 +41,8 @@ func TestHandler_Me(t *testing.T) {
 				expUpdateJWT: true,
 				userID:       1,
 				expGetUser:   true,
-				user: &orm.User{
-					ID:    "1",
+				user: &model.User{
+					ID:    1,
 					Email: "admin@email.com",
 				},
 			},
@@ -88,7 +89,7 @@ func TestHandler_UpdateUser(t *testing.T) {
 		userID        int
 		role          string
 		expUpdateUser bool
-		user          *orm.User
+		user          *model.User
 		userErr       error
 	}
 
@@ -98,7 +99,7 @@ func TestHandler_UpdateUser(t *testing.T) {
 
 	type expected struct {
 		Status int
-		Body   orm.User
+		Body   view.UserResponse
 	}
 	tests := []struct {
 		name     string
@@ -112,23 +113,24 @@ func TestHandler_UpdateUser(t *testing.T) {
 				expUpdateJWT:  true,
 				userID:        1,
 				expUpdateUser: true,
-				user: &orm.User{
-					ID:    "1",
+				user: &model.User{
+					ID:    1,
 					Email: "admin@email.com",
 				},
 			},
 			args: args{
 				input: view.UpdateUserRequest{
 					FullName: "Admin",
-					Status:   "active",
 					Avatar:   "https://www.google.com",
 				},
 			},
 			expected: expected{
 				Status: 200,
-				Body: orm.User{
-					ID:    "1",
-					Email: "admin@email.com",
+				Body: view.UserResponse{
+					Data: view.User{
+						ID:    1,
+						Email: "admin@email.com",
+					},
 				},
 			},
 		},
@@ -203,9 +205,8 @@ func TestHandler_UpdatePassword(t *testing.T) {
 			},
 			args: args{
 				input: view.UpdatePasswordRequest{
-					Email:          "admin@gmail.com",
-					NewPassword:    "123456",
-					RetypePassword: "123456",
+					NewPassword: "123456",
+					OldPassword: "123456",
 				},
 			},
 			expected: expected{
@@ -232,7 +233,7 @@ func TestHandler_UpdatePassword(t *testing.T) {
 		)
 
 		if tt.mocked.expUpdatePassword {
-			ctrlMock.EXPECT().UpdatePassword(mock.Anything).Return(tt.mocked.userErr)
+			ctrlMock.EXPECT().UpdatePassword(mock.Anything, mock.Anything).Return(tt.mocked.userErr)
 		}
 		t.Run(tt.name, func(t *testing.T) {
 			h := Handler{

@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	model "github.com/dwarvesf/go-api/pkg/model"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -20,25 +22,25 @@ func (_m *Controller) EXPECT() *Controller_Expecter {
 	return &Controller_Expecter{mock: &_m.Mock}
 }
 
-// Login provides a mock function with given fields: req
-func (_m *Controller) Login(req model.LoginRequest) (*model.LoginResponse, error) {
-	ret := _m.Called(req)
+// Login provides a mock function with given fields: ctx, req
+func (_m *Controller) Login(ctx context.Context, req model.LoginRequest) (*model.LoginResponse, error) {
+	ret := _m.Called(ctx, req)
 
 	var r0 *model.LoginResponse
 	var r1 error
-	if rf, ok := ret.Get(0).(func(model.LoginRequest) (*model.LoginResponse, error)); ok {
-		return rf(req)
+	if rf, ok := ret.Get(0).(func(context.Context, model.LoginRequest) (*model.LoginResponse, error)); ok {
+		return rf(ctx, req)
 	}
-	if rf, ok := ret.Get(0).(func(model.LoginRequest) *model.LoginResponse); ok {
-		r0 = rf(req)
+	if rf, ok := ret.Get(0).(func(context.Context, model.LoginRequest) *model.LoginResponse); ok {
+		r0 = rf(ctx, req)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.LoginResponse)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(model.LoginRequest) error); ok {
-		r1 = rf(req)
+	if rf, ok := ret.Get(1).(func(context.Context, model.LoginRequest) error); ok {
+		r1 = rf(ctx, req)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -52,14 +54,15 @@ type Controller_Login_Call struct {
 }
 
 // Login is a helper method to define mock.On call
+//   - ctx context.Context
 //   - req model.LoginRequest
-func (_e *Controller_Expecter) Login(req interface{}) *Controller_Login_Call {
-	return &Controller_Login_Call{Call: _e.mock.On("Login", req)}
+func (_e *Controller_Expecter) Login(ctx interface{}, req interface{}) *Controller_Login_Call {
+	return &Controller_Login_Call{Call: _e.mock.On("Login", ctx, req)}
 }
 
-func (_c *Controller_Login_Call) Run(run func(req model.LoginRequest)) *Controller_Login_Call {
+func (_c *Controller_Login_Call) Run(run func(ctx context.Context, req model.LoginRequest)) *Controller_Login_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(model.LoginRequest))
+		run(args[0].(context.Context), args[1].(model.LoginRequest))
 	})
 	return _c
 }
@@ -69,18 +72,18 @@ func (_c *Controller_Login_Call) Return(_a0 *model.LoginResponse, _a1 error) *Co
 	return _c
 }
 
-func (_c *Controller_Login_Call) RunAndReturn(run func(model.LoginRequest) (*model.LoginResponse, error)) *Controller_Login_Call {
+func (_c *Controller_Login_Call) RunAndReturn(run func(context.Context, model.LoginRequest) (*model.LoginResponse, error)) *Controller_Login_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// Signup provides a mock function with given fields: req
-func (_m *Controller) Signup(req model.SignupRequest) error {
-	ret := _m.Called(req)
+// Signup provides a mock function with given fields: ctx, req
+func (_m *Controller) Signup(ctx context.Context, req model.SignupRequest) error {
+	ret := _m.Called(ctx, req)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(model.SignupRequest) error); ok {
-		r0 = rf(req)
+	if rf, ok := ret.Get(0).(func(context.Context, model.SignupRequest) error); ok {
+		r0 = rf(ctx, req)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -94,14 +97,15 @@ type Controller_Signup_Call struct {
 }
 
 // Signup is a helper method to define mock.On call
+//   - ctx context.Context
 //   - req model.SignupRequest
-func (_e *Controller_Expecter) Signup(req interface{}) *Controller_Signup_Call {
-	return &Controller_Signup_Call{Call: _e.mock.On("Signup", req)}
+func (_e *Controller_Expecter) Signup(ctx interface{}, req interface{}) *Controller_Signup_Call {
+	return &Controller_Signup_Call{Call: _e.mock.On("Signup", ctx, req)}
 }
 
-func (_c *Controller_Signup_Call) Run(run func(req model.SignupRequest)) *Controller_Signup_Call {
+func (_c *Controller_Signup_Call) Run(run func(ctx context.Context, req model.SignupRequest)) *Controller_Signup_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(model.SignupRequest))
+		run(args[0].(context.Context), args[1].(model.SignupRequest))
 	})
 	return _c
 }
@@ -111,7 +115,7 @@ func (_c *Controller_Signup_Call) Return(_a0 error) *Controller_Signup_Call {
 	return _c
 }
 
-func (_c *Controller_Signup_Call) RunAndReturn(run func(model.SignupRequest) error) *Controller_Signup_Call {
+func (_c *Controller_Signup_Call) RunAndReturn(run func(context.Context, model.SignupRequest) error) *Controller_Signup_Call {
 	_c.Call.Return(run)
 	return _c
 }

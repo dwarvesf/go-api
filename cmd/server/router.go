@@ -3,6 +3,8 @@ package main
 import (
 	"github.com/dwarvesf/go-api/docs"
 	"github.com/dwarvesf/go-api/pkg/handler"
+	"github.com/dwarvesf/go-api/pkg/handler/v1/portal"
+	"github.com/dwarvesf/go-api/pkg/middleware"
 	"github.com/getsentry/sentry-go"
 	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-contrib/cors"
@@ -54,13 +56,33 @@ func setupRouter(a App, sClient *sentry.Client) *gin.Engine {
 
 func publicHandler(r *gin.Engine, a App) {
 	h := handler.New(*a.cfg)
+	portalHandler := portal.New(*a.cfg, a.l, a.repo, a.service)
 
 	r.GET("/healthz", h.Healthz)
 
 	// use ginSwagger middleware to serve the API docs
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// api/v1
+	apiV1 := r.Group("/api/v1")
+	portalGroup := apiV1.Group("/portal")
+	{
+		portalGroup.POST("/auth/login", portalHandler.Login)
+		portalGroup.POST("/auth/signup", portalHandler.Signup)
+	}
 }
 
 func authenticatedHandler(r *gin.Engine, a App) {
 
+	// api/v1
+	authMw := middleware.NewAuthMiddleware(a.cfg.SecretKey)
+	apiV1 := r.Group("/api/v1")
+	apiV1.Use(authMw.WithAuth)
+	portalGroup := apiV1.Group("/portal")
+	{
+		portalHandler := portal.New(*a.cfg, a.l, a.repo, a.service)
+		portalGroup.GET("/me", portalHandler.Me)
+		portalGroup.PUT("/users", portalHandler.UpdateUser)
+		portalGroup.PUT("/users/password", portalHandler.UpdatePassword)
+	}
 }

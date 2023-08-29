@@ -41,7 +41,7 @@ func TestHandler_Login(t *testing.T) {
 			mocked: mocked{
 				expLoginCalled: true,
 				loginResponse: &model.LoginResponse{
-					ID:          "1",
+					ID:          1,
 					Email:       "admin@email.com",
 					AccessToken: "token",
 				},
@@ -102,7 +102,7 @@ func TestHandler_Login(t *testing.T) {
 		)
 
 		if tt.mocked.expLoginCalled {
-			ctrlMock.EXPECT().Login(mock.Anything).Return(tt.mocked.loginResponse, tt.mocked.loginErr)
+			ctrlMock.EXPECT().Login(mock.Anything, mock.Anything).Return(tt.mocked.loginResponse, tt.mocked.loginErr)
 		}
 		t.Run(tt.name, func(t *testing.T) {
 			h := Handler{
@@ -172,7 +172,7 @@ func TestHandler_Signup(t *testing.T) {
 		)
 
 		if tt.mocked.expSignupCalled {
-			ctrlMock.EXPECT().Signup(mock.Anything).Return(tt.mocked.signupErr)
+			ctrlMock.EXPECT().Signup(mock.Anything, mock.Anything).Return(tt.mocked.signupErr)
 		}
 		t.Run(tt.name, func(t *testing.T) {
 			h := Handler{

@@ -23,6 +23,13 @@ var (
 		Code:    "WRONG_CREDENTIALS",
 		Message: "Wrong username or password",
 	}
+
+	// ErrNotFound is the error for not found
+	ErrNotFound = Error{
+		Status:  http.StatusNotFound,
+		Code:    "NOT_FOUND",
+		Message: "not found",
+	}
 )
 
 // Error in server

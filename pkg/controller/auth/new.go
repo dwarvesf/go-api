@@ -1,26 +1,28 @@
 package auth
 
 import (
+	"context"
+
 	"github.com/dwarvesf/go-api/pkg/config"
 	"github.com/dwarvesf/go-api/pkg/model"
-	"github.com/dwarvesf/go-api/pkg/repository/orm"
+	"github.com/dwarvesf/go-api/pkg/repository"
 	"github.com/dwarvesf/go-api/pkg/service/jwthelper"
 )
 
 // Controller auth controller
 type Controller interface {
-	Login(req model.LoginRequest) (*model.LoginResponse, error)
-	Signup(req model.SignupRequest) error
+	Login(ctx context.Context, req model.LoginRequest) (*model.LoginResponse, error)
+	Signup(ctx context.Context, req model.SignupRequest) error
 }
 
 type impl struct {
-	repo      orm.Repo
+	repo      *repository.Repo
 	jwtHelper jwthelper.Helper
 	cfg       config.Config
 }
 
 // NewAuthController new auth controller
-func NewAuthController(cfg config.Config, r orm.Repo) Controller {
+func NewAuthController(cfg config.Config, r *repository.Repo) Controller {
 	return &impl{
 		repo:      r,
 		jwtHelper: jwthelper.NewHelper(cfg.SecretKey),

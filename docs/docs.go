@@ -193,6 +193,17 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "Update user",
+                "parameters": [
+                    {
+                        "description": "Update user",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateUserRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -221,8 +232,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/portal/users/change-passwords": {
+        "/portal/users/password": {
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update user's password",
                 "consumes": [
                     "application/json"
@@ -234,6 +250,17 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "Update user's password",
+                "parameters": [
+                    {
+                        "description": "Update user",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdatePasswordRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -279,7 +306,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "integer"
                 }
             }
         },
@@ -357,7 +384,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "integer"
                 }
             }
         },
@@ -369,7 +396,7 @@ const docTemplate = `{
                 }
             }
         },
-        "MessageResponse": {
+        "Message": {
             "type": "object",
             "required": [
                 "message"
@@ -377,6 +404,14 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string"
+                }
+            }
+        },
+        "MessageResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/Message"
                 }
             }
         },
@@ -405,23 +440,52 @@ const docTemplate = `{
                 }
             }
         },
-        "User": {
+        "UpdatePasswordRequest": {
+            "type": "object",
+            "required": [
+                "newPassword",
+                "oldPassword"
+            ],
+            "properties": {
+                "newPassword": {
+                    "type": "string"
+                },
+                "oldPassword": {
+                    "type": "string"
+                }
+            }
+        },
+        "UpdateUserRequest": {
             "type": "object",
             "properties": {
-                "created_at": {
+                "avatar": {
+                    "type": "string"
+                },
+                "fullName": {
+                    "type": "string"
+                }
+            }
+        },
+        "User": {
+            "type": "object",
+            "required": [
+                "avatar",
+                "email",
+                "fullName",
+                "id"
+            ],
+            "properties": {
+                "avatar": {
                     "type": "string"
                 },
                 "email": {
                     "type": "string"
                 },
+                "fullName": {
+                    "type": "string"
+                },
                 "id": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
+                    "type": "integer"
                 }
             }
         }

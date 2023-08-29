@@ -8,7 +8,7 @@ type LoginRequest struct {
 
 // LoginResponse represent the login response
 type LoginResponse struct {
-	ID          string
+	ID          int
 	Email       string
 	AccessToken string
 }
@@ -18,6 +18,5 @@ type SignupRequest struct {
 	Email    string
 	Password string
 	FullName string
-	Status   string
 	Avatar   string
 }

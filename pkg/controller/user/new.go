@@ -1,25 +1,27 @@
 package user
 
 import (
+	"context"
+
 	"github.com/dwarvesf/go-api/pkg/config"
 	"github.com/dwarvesf/go-api/pkg/model"
-	"github.com/dwarvesf/go-api/pkg/repository/orm"
+	"github.com/dwarvesf/go-api/pkg/repository"
 )
 
 // Controller auth controller
 type Controller interface {
-	Me(userID int) (*orm.User, error)
-	UpdateUser(ID int, user model.UpdateUserRequest) (*orm.User, error)
-	UpdatePassword(user model.UpdatePasswordRequest) error
+	Me(ctx context.Context) (*model.User, error)
+	UpdateUser(ctx context.Context, user model.UpdateUserRequest) (*model.User, error)
+	UpdatePassword(ctx context.Context, user model.UpdatePasswordRequest) error
 }
 
 type impl struct {
-	repo orm.Repo
+	repo *repository.Repo
 	cfg  config.Config
 }
 
 // NewUserController new auth controller
-func NewUserController(cfg config.Config, r orm.Repo) Controller {
+func NewUserController(cfg config.Config, r *repository.Repo) Controller {
 	return &impl{
 		repo: r,
 		cfg:  cfg,

@@ -11,7 +11,7 @@ type LoginResponse = Response[Auth] // @name LoginResponse
 
 // Auth represent the auth response
 type Auth struct {
-	ID          string `json:"id" validate:"required"`
+	ID          int    `json:"id" validate:"required"`
 	Email       string `json:"email" validate:"required"`
 	AccessToken string `json:"accessToken" validate:"required" `
 } // @name Auth
