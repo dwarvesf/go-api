@@ -7,7 +7,7 @@ definitions:
       email:
         type: string
       id:
-        type: string
+        type: integer
     required:
     - accessToken
     - email
@@ -60,7 +60,7 @@ definitions:
       email:
         type: string
       id:
-        type: string
+        type: integer
     required:
     - email
     - id
@@ -70,12 +70,17 @@ definitions:
       data:
         $ref: '#/definitions/Me'
     type: object
-  MessageResponse:
+  Message:
     properties:
       message:
         type: string
     required:
     - message
+    type: object
+  MessageResponse:
+    properties:
+      data:
+        $ref: '#/definitions/Message'
     type: object
   SignupRequest:
     properties:
@@ -93,6 +98,39 @@ definitions:
     - email
     - fullName
     - password
+    type: object
+  UpdatePasswordRequest:
+    properties:
+      newPassword:
+        type: string
+      oldPassword:
+        type: string
+    required:
+    - newPassword
+    - oldPassword
+    type: object
+  UpdateUserRequest:
+    properties:
+      avatar:
+        type: string
+      fullName:
+        type: string
+    type: object
+  User:
+    properties:
+      avatar:
+        type: string
+      email:
+        type: string
+      fullName:
+        type: string
+      id:
+        type: integer
+    required:
+    - avatar
+    - email
+    - fullName
+    - id
     type: object
 info:
   contact:
@@ -202,6 +240,78 @@ paths:
       security:
       - BearerAuth: []
       summary: Retrieve my information
+      tags:
+      - User
+  /portal/users:
+    put:
+      consumes:
+      - application/json
+      description: Update user
+      parameters:
+      - description: Update user
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user
+      tags:
+      - User
+  /portal/users/password:
+    put:
+      consumes:
+      - application/json
+      description: Update user's password
+      parameters:
+      - description: Update user
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/UpdatePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user's password
       tags:
       - User
 securityDefinitions:

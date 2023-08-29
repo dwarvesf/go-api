@@ -62,9 +62,9 @@ func DefaultConfigLoaders() []Loader {
 // LoadConfig load config from loader list
 func LoadConfig(loaders []Loader) *Config {
 	v := viper.New()
-	v.SetDefault("APP", "scc")
+	v.SetDefault("APP", "api-go")
 	v.SetDefault("PORT", "3000")
-	v.SetDefault("ENV", "local")
+	v.SetDefault("ENV", "prod")
 	v.SetDefault("ALLOWED_ORIGINS", "*")
 	v.SetDefault("VERSION", "0.0.1")
 	v.SetDefault("SERVER_NAME", "local")

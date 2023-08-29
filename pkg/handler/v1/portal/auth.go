@@ -22,15 +22,15 @@ import (
 // @Failure 500 {object} ErrorResponse
 // @Router /portal/auth/login [post]
 func (h Handler) Login(c *gin.Context) {
-	var loginReq view.LoginRequest
-	if err := c.ShouldBindJSON(&loginReq); err != nil {
+	var req view.LoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		util.HandleError(c, view.ErrBadRequest(err))
 		return
 	}
 
-	rs, err := h.authCtrl.Login(model.LoginRequest{
-		Email:    loginReq.Email,
-		Password: loginReq.Password,
+	rs, err := h.authCtrl.Login(c.Request.Context(), model.LoginRequest{
+		Email:    req.Email,
+		Password: req.Password,
 	})
 	if err != nil {
 		h.log.Error(err)
@@ -60,15 +60,16 @@ func (h Handler) Login(c *gin.Context) {
 // @Failure 500 {object} ErrorResponse
 // @Router /portal/auth/signup [post]
 func (h Handler) Signup(c *gin.Context) {
-	var loginReq view.SignupRequest
-	if err := c.ShouldBindJSON(&loginReq); err != nil {
+	var req view.SignupRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		util.HandleError(c, view.ErrBadRequest(err))
 		return
 	}
 
-	err := h.authCtrl.Signup(model.SignupRequest{
-		Email:    loginReq.Email,
-		Password: loginReq.Password,
+	err := h.authCtrl.Signup(c.Request.Context(), model.SignupRequest{
+		Email:    req.Email,
+		Password: req.Password,
+		FullName: req.FullName,
 	})
 	if err != nil {
 		h.log.Error(err)
@@ -76,5 +77,9 @@ func (h Handler) Signup(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, view.MessageResponse{Message: "OK"})
+	c.JSON(http.StatusCreated, view.MessageResponse{
+		Data: view.Message{
+			Message: "success",
+		},
+	})
 }

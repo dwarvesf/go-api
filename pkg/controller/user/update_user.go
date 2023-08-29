@@ -7,7 +7,7 @@ import (
 	"github.com/dwarvesf/go-api/pkg/model"
 )
 
-func (c *impl) Me(ctx context.Context) (*model.User, error) {
+func (c *impl) UpdateUser(ctx context.Context, user model.UpdateUserRequest) (*model.User, error) {
 	uID, err := middleware.UserIDFromContext(ctx)
 	if err != nil {
 		return nil, model.ErrInvalidToken
@@ -18,5 +18,13 @@ func (c *impl) Me(ctx context.Context) (*model.User, error) {
 		return nil, err
 	}
 
-	return u, nil
+	u.Avatar = user.Avatar
+	u.FullName = user.FullName
+
+	updated, err := c.repo.User.Update(ctx, u)
+	if err != nil {
+		return nil, err
+	}
+
+	return updated, nil
 }

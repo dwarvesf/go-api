@@ -11,6 +11,7 @@ import (
 
 	"github.com/dwarvesf/go-api/pkg/config"
 	"github.com/dwarvesf/go-api/pkg/logger"
+	"github.com/dwarvesf/go-api/pkg/repository"
 	"github.com/dwarvesf/go-api/pkg/service"
 )
 
@@ -45,8 +46,10 @@ func main() {
 	l.Infof("Server starting")
 
 	a := App{
-		l:   l,
-		cfg: cfg,
+		l:       l,
+		cfg:     cfg,
+		service: service.New(cfg),
+		repo:    repository.NewRepo(),
 	}
 
 	// Server
@@ -88,4 +91,5 @@ type App struct {
 	l       logger.Log
 	cfg     *config.Config
 	service service.Service
+	repo    *repository.Repo
 }

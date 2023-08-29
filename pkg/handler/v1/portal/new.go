@@ -5,7 +5,7 @@ import (
 	"github.com/dwarvesf/go-api/pkg/controller/auth"
 	"github.com/dwarvesf/go-api/pkg/controller/user"
 	"github.com/dwarvesf/go-api/pkg/logger"
-	"github.com/dwarvesf/go-api/pkg/repository/orm"
+	"github.com/dwarvesf/go-api/pkg/repository"
 	"github.com/dwarvesf/go-api/pkg/service"
 )
 
@@ -19,12 +19,12 @@ type Handler struct {
 }
 
 // New will return an instance of Auth struct
-func New(cfg config.Config, l logger.Log, svc service.Service) *Handler {
+func New(cfg config.Config, l logger.Log, repo *repository.Repo, svc service.Service) *Handler {
 	return &Handler{
 		cfg:      cfg,
 		log:      l,
 		svc:      svc,
-		authCtrl: auth.NewAuthController(cfg, orm.NewRepo()),
-		userCtrl: user.NewUserController(cfg, orm.NewRepo()),
+		authCtrl: auth.NewAuthController(cfg, repo),
+		userCtrl: user.NewUserController(cfg, repo),
 	}
 }

@@ -31,7 +31,7 @@ type User struct {
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
-}
+} // @name User
 
 var UserColumns = struct {
 	ID        string
