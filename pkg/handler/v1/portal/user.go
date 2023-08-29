@@ -3,8 +3,8 @@ package portal
 import (
 	"net/http"
 
-	"github.com/dwarvesf/go-api/pkg/handler/v1/viewmodel"
-	"github.com/dwarvesf/go-api/pkg/mw"
+	"github.com/dwarvesf/go-api/pkg/handler/v1/view"
+	mw "github.com/dwarvesf/go-api/pkg/middleware"
 	"github.com/dwarvesf/go-api/pkg/util"
 	"github.com/gin-gonic/gin"
 )
@@ -33,8 +33,10 @@ func (h Handler) Me(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, viewmodel.MeResponse{
-		ID:    rs.ID,
-		Email: rs.Email,
+	c.JSON(http.StatusOK, view.MeResponse{
+		Data: view.Me{
+			ID:    rs.ID,
+			Email: rs.Email,
+		},
 	})
 }

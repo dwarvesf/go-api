@@ -9,18 +9,22 @@ import (
 	"net/http/httptest"
 	"net/url"
 
-	"github.com/dwarvesf/go-api/pkg/mw"
+	mw "github.com/dwarvesf/go-api/pkg/middleware"
 	"github.com/gin-gonic/gin"
 )
 
-// HttpMethod enum
-type HttpMethod string
+// HTTPMethod enum
+type HTTPMethod string
 
 const (
-	MethodGet    HttpMethod = "GET"
-	MethodPost   HttpMethod = "POST"
-	MethodPut    HttpMethod = "PUT"
-	MethodDelete HttpMethod = "Delete"
+	// MethodGet http method
+	MethodGet HTTPMethod = "GET"
+	// MethodPost http method
+	MethodPost HTTPMethod = "POST"
+	// MethodPut http method
+	MethodPut HTTPMethod = "PUT"
+	// MethodDelete http method
+	MethodDelete HTTPMethod = "Delete"
 )
 
 var defaultHeaders = map[string]string{
@@ -51,7 +55,7 @@ func updateHeaders(ctx *gin.Context, headers map[string]string) {
 }
 
 // NewRequest make a gin.Context request
-func NewRequest(w *httptest.ResponseRecorder, method HttpMethod, headers map[string]string, params []gin.Param, u url.Values, body interface{}) *gin.Context {
+func NewRequest(w *httptest.ResponseRecorder, method HTTPMethod, headers map[string]string, params []gin.Param, u url.Values, body interface{}) *gin.Context {
 	ctx := GinContext(w)
 
 	ctx.Request.Method = string(method)

@@ -3,7 +3,7 @@ package portal
 import (
 	"net/http"
 
-	"github.com/dwarvesf/go-api/pkg/handler/v1/viewmodel"
+	"github.com/dwarvesf/go-api/pkg/handler/v1/view"
 	"github.com/dwarvesf/go-api/pkg/model"
 	"github.com/dwarvesf/go-api/pkg/util"
 	"github.com/gin-gonic/gin"
@@ -22,9 +22,9 @@ import (
 // @Failure 500 {object} ErrorResponse
 // @Router /portal/auth/login [post]
 func (h Handler) Login(c *gin.Context) {
-	var loginReq viewmodel.LoginRequest
+	var loginReq view.LoginRequest
 	if err := c.ShouldBindJSON(&loginReq); err != nil {
-		util.HandleError(c, viewmodel.ErrBadRequest(err))
+		util.HandleError(c, view.ErrBadRequest(err))
 		return
 	}
 
@@ -38,10 +38,12 @@ func (h Handler) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, viewmodel.LoginResponse{
-		ID:          rs.ID,
-		Email:       rs.Email,
-		AccessToken: rs.AccessToken,
+	c.JSON(http.StatusOK, view.LoginResponse{
+		Data: view.Auth{
+			ID:          rs.ID,
+			Email:       rs.Email,
+			AccessToken: rs.AccessToken,
+		},
 	})
 }
 
@@ -58,9 +60,9 @@ func (h Handler) Login(c *gin.Context) {
 // @Failure 500 {object} ErrorResponse
 // @Router /portal/auth/signup [post]
 func (h Handler) Signup(c *gin.Context) {
-	var loginReq viewmodel.SignupRequest
+	var loginReq view.SignupRequest
 	if err := c.ShouldBindJSON(&loginReq); err != nil {
-		util.HandleError(c, viewmodel.ErrBadRequest(err))
+		util.HandleError(c, view.ErrBadRequest(err))
 		return
 	}
 
@@ -74,5 +76,5 @@ func (h Handler) Signup(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, viewmodel.MessageResponse{Message: "OK"})
+	c.JSON(http.StatusOK, view.MessageResponse{Message: "OK"})
 }

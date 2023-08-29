@@ -6,8 +6,6 @@ import (
 )
 
 // Controller auth controller
-//
-//go:generate mockery --name=Controller --with-expecter --output ./mocks
 type Controller interface {
 	Me(userID int) (*orm.User, error)
 }
@@ -17,6 +15,7 @@ type impl struct {
 	cfg  config.Config
 }
 
+// NewUserController new auth controller
 func NewUserController(cfg config.Config, r orm.Repo) Controller {
 	return &impl{
 		repo: r,

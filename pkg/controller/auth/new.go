@@ -8,8 +8,6 @@ import (
 )
 
 // Controller auth controller
-//
-//go:generate mockery --name=Controller --with-expecter --output ./mocks
 type Controller interface {
 	Login(req model.LoginRequest) (*model.LoginResponse, error)
 	Signup(req model.SignupRequest) error
@@ -21,6 +19,7 @@ type impl struct {
 	cfg       config.Config
 }
 
+// NewAuthController new auth controller
 func NewAuthController(cfg config.Config, r orm.Repo) Controller {
 	return &impl{
 		repo:      r,

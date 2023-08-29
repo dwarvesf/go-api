@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/dwarvesf/go-api/pkg/handler/testutil"
-	"github.com/dwarvesf/go-api/pkg/handler/v1/viewmodel"
+	"github.com/dwarvesf/go-api/pkg/handler/v1/view"
 	"github.com/dwarvesf/go-api/pkg/model"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -67,17 +67,17 @@ func Test_tryParseError(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want viewmodel.ErrorResponse
+		want view.ErrorResponse
 	}{
 		{
 			name: "valid error",
 			args: args{
 				err: model.Error{Status: 400, Code: "WRONG_CREDENTIALS", Message: "Wrong username or password"},
 			},
-			want: viewmodel.ErrorResponse{
-				Status:  400,
-				Code:    "WRONG_CREDENTIALS",
-				Message: "Wrong username or password",
+			want: view.ErrorResponse{
+				Status: 400,
+				Code:   "WRONG_CREDENTIALS",
+				Err:    "Wrong username or password",
 			},
 		},
 		{
@@ -85,25 +85,25 @@ func Test_tryParseError(t *testing.T) {
 			args: args{
 				err: errors.WithStack(model.NewError(400, "bad_request", "bad request")),
 			},
-			want: viewmodel.ErrorResponse{
-				Status:  400,
-				Code:    "bad_request",
-				Message: "bad request",
+			want: view.ErrorResponse{
+				Status: 400,
+				Code:   "bad_request",
+				Err:    "bad request",
 			},
 		},
 		{
 			name: "valid viewmodel error",
 			args: args{
-				err: viewmodel.ErrorResponse{
-					Status:  400,
-					Code:    "bad_request",
-					Message: "bad request",
+				err: view.ErrorResponse{
+					Status: 400,
+					Code:   "bad_request",
+					Err:    "bad request",
 				},
 			},
-			want: viewmodel.ErrorResponse{
-				Status:  400,
-				Code:    "bad_request",
-				Message: "bad request",
+			want: view.ErrorResponse{
+				Status: 400,
+				Code:   "bad_request",
+				Err:    "bad request",
 			},
 		},
 	}

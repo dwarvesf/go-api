@@ -17,6 +17,7 @@ const RoleCtxKey = contextKey("role")
 // UserIDCtxKey is the key used to store to context
 const UserIDCtxKey = contextKey("userID")
 
+// AuthMiddleware middleware struct for auth
 type AuthMiddleware struct {
 	jwtH jwthelper.Helper
 }

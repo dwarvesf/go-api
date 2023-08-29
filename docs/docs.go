@@ -177,22 +177,62 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "Auth": {
+            "type": "object",
+            "required": [
+                "accessToken",
+                "email",
+                "id"
+            ],
+            "properties": {
+                "accessToken": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ErrorDetail": {
+            "type": "object",
+            "required": [
+                "error",
+                "field"
+            ],
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "field": {
+                    "type": "string"
+                }
+            }
+        },
         "ErrorResponse": {
             "type": "object",
             "required": [
                 "code",
-                "message",
-                "status"
+                "error",
+                "traceId"
             ],
             "properties": {
                 "code": {
                     "type": "string"
                 },
-                "message": {
+                "error": {
                     "type": "string"
                 },
-                "status": {
-                    "type": "integer"
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ErrorDetail"
+                    }
+                },
+                "traceId": {
+                    "type": "string"
                 }
             }
         },
@@ -213,24 +253,13 @@ const docTemplate = `{
         },
         "LoginResponse": {
             "type": "object",
-            "required": [
-                "access_token",
-                "email",
-                "id"
-            ],
             "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
+                "data": {
+                    "$ref": "#/definitions/Auth"
                 }
             }
         },
-        "MeResponse": {
+        "Me": {
             "type": "object",
             "required": [
                 "email",
@@ -242,6 +271,14 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                }
+            }
+        },
+        "MeResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/Me"
                 }
             }
         },
@@ -260,6 +297,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "email",
+                "fullName",
                 "password"
             ],
             "properties": {
@@ -269,7 +307,7 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
-                "full_name": {
+                "fullName": {
                     "type": "string"
                 },
                 "password": {

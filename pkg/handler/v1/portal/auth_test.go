@@ -9,7 +9,7 @@ import (
 	mocks "github.com/dwarvesf/go-api/mocks/pkg/controller/auth"
 	"github.com/dwarvesf/go-api/pkg/config"
 	"github.com/dwarvesf/go-api/pkg/handler/testutil"
-	"github.com/dwarvesf/go-api/pkg/handler/v1/viewmodel"
+	"github.com/dwarvesf/go-api/pkg/handler/v1/view"
 	"github.com/dwarvesf/go-api/pkg/logger"
 	"github.com/dwarvesf/go-api/pkg/model"
 	"github.com/stretchr/testify/assert"
@@ -23,7 +23,7 @@ func TestHandler_Login(t *testing.T) {
 		loginErr       error
 	}
 	type args struct {
-		input viewmodel.LoginRequest
+		input view.LoginRequest
 	}
 	type expected struct {
 		Status int
@@ -48,7 +48,7 @@ func TestHandler_Login(t *testing.T) {
 				loginErr: nil,
 			},
 			args: args{
-				input: viewmodel.LoginRequest{
+				input: view.LoginRequest{
 					Email:    "admin@gmail.com",
 					Password: "abcd1234",
 				},
@@ -66,7 +66,7 @@ func TestHandler_Login(t *testing.T) {
 				loginErr:       model.ErrInvalidCredentials,
 			},
 			args: args{
-				input: viewmodel.LoginRequest{
+				input: view.LoginRequest{
 					Email:    "admin@gmail.com",
 					Password: "invalid",
 				},
@@ -82,7 +82,7 @@ func TestHandler_Login(t *testing.T) {
 				expLoginCalled: false,
 			},
 			args: args{
-				input: viewmodel.LoginRequest{
+				input: view.LoginRequest{
 					Email:    "admin@gmail.com",
 					Password: "",
 				},
@@ -125,11 +125,11 @@ func TestHandler_Signup(t *testing.T) {
 		signupErr       error
 	}
 	type args struct {
-		input viewmodel.SignupRequest
+		input view.SignupRequest
 	}
 	type expected struct {
 		Status int
-		Body   viewmodel.MessageResponse
+		Body   view.MessageResponse
 	}
 
 	tests := []struct {
@@ -145,7 +145,7 @@ func TestHandler_Signup(t *testing.T) {
 				signupErr:       nil,
 			},
 			args: args{
-				input: viewmodel.SignupRequest{
+				input: view.SignupRequest{
 					Email:    "admin@gmail.com",
 					Password: "abcd1234",
 					FullName: "Admin",
@@ -155,7 +155,7 @@ func TestHandler_Signup(t *testing.T) {
 			},
 			expected: expected{
 				Status: http.StatusOK,
-				Body:   viewmodel.MessageResponse{Message: "OK"},
+				Body:   view.MessageResponse{Message: "OK"},
 			},
 		},
 	}

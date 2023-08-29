@@ -6,8 +6,6 @@ import (
 )
 
 // Helper jwt helper
-//
-//go:generate mockery --name=Helper --with-expecter --output ./mocks
 type Helper interface {
 	GenerateJWTToken(claims jwt.MapClaims) (string, error)
 	ValidateToken(token string) (map[string]interface{}, error)

@@ -9,6 +9,7 @@ type Loader interface {
 	Load(viper.Viper) (*viper.Viper, error)
 }
 
+// Config struct for config
 type Config struct {
 	App            string
 	Env            string
@@ -23,15 +24,18 @@ type Config struct {
 	SentryDSN string
 }
 
+// IsLocal check if env is local
 func (c *Config) IsLocal() bool {
 	return c.Env == "local"
 }
 
+// ENV interface for getting env
 type ENV interface {
 	GetBool(string) bool
 	GetString(string) string
 }
 
+// Generate generate config from ENV
 func Generate(v ENV) *Config {
 	return &Config{
 		App:            v.GetString("APP"),
@@ -46,6 +50,7 @@ func Generate(v ENV) *Config {
 	}
 }
 
+// DefaultConfigLoaders return default config loaders
 func DefaultConfigLoaders() []Loader {
 	var loaders []Loader
 	fileLoader := NewDotenv()
@@ -74,8 +79,9 @@ func LoadConfig(loaders []Loader) *Config {
 	return Generate(v)
 }
 
+// LoadTestConfig load test config
 func LoadTestConfig() Config {
 	return Config{
-		Port: "8080",
+		Port: "4000",
 	}
 }

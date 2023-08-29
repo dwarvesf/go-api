@@ -1,17 +1,44 @@
 basePath: /api/v1
 definitions:
+  Auth:
+    properties:
+      accessToken:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+    required:
+    - accessToken
+    - email
+    - id
+    type: object
+  ErrorDetail:
+    properties:
+      error:
+        type: string
+      field:
+        type: string
+    required:
+    - error
+    - field
+    type: object
   ErrorResponse:
     properties:
       code:
         type: string
-      message:
+      error:
         type: string
-      status:
-        type: integer
+      errors:
+        items:
+          $ref: '#/definitions/ErrorDetail'
+        type: array
+      traceId:
+        type: string
     required:
     - code
-    - message
-    - status
+    - error
+    - traceId
     type: object
   LoginRequest:
     properties:
@@ -25,18 +52,10 @@ definitions:
     type: object
   LoginResponse:
     properties:
-      access_token:
-        type: string
-      email:
-        type: string
-      id:
-        type: string
-    required:
-    - access_token
-    - email
-    - id
+      data:
+        $ref: '#/definitions/Auth'
     type: object
-  MeResponse:
+  Me:
     properties:
       email:
         type: string
@@ -45,6 +64,11 @@ definitions:
     required:
     - email
     - id
+    type: object
+  MeResponse:
+    properties:
+      data:
+        $ref: '#/definitions/Me'
     type: object
   MessageResponse:
     properties:
@@ -59,7 +83,7 @@ definitions:
         type: string
       email:
         type: string
-      full_name:
+      fullName:
         type: string
       password:
         type: string
@@ -67,6 +91,7 @@ definitions:
         type: string
     required:
     - email
+    - fullName
     - password
     type: object
 info:
