@@ -1,23 +1,37 @@
 package user
 
 import (
-	"context"
-
 	"github.com/dwarvesf/go-api/pkg/model"
+	"github.com/dwarvesf/go-api/pkg/repository/db"
+	"github.com/dwarvesf/go-api/pkg/repository/orm"
 )
 
 // Repo represent the user
 type Repo interface {
-	GetByID(ctx context.Context, id int) (*model.User, error)
-	GetByEmail(ctx context.Context, email string) (*model.User, error)
-	Create(ctx context.Context, user *model.SignupRequest) (*model.User, error)
-	Update(ctx context.Context, user *model.User) (*model.User, error)
-	UpdatePassword(ctx context.Context, uID int, newPassword string) error
+	GetByID(ctx db.Context, id int) (*model.User, error)
+	GetByEmail(ctx db.Context, email string) (*model.User, error)
+	Create(ctx db.Context, user model.SignupRequest) (*model.User, error)
+	Update(ctx db.Context, uID int, user model.UpdateUserRequest) (*model.User, error)
+	UpdatePassword(ctx db.Context, uID int, newPassword string) error
 }
 
 // New return new user repo
 func New() Repo {
-	return &mem{
-		users: make(map[int]model.User),
+	return &repo{}
+}
+
+func toUserModel(user *orm.User) *model.User {
+	if user == nil {
+		return nil
+	}
+	return &model.User{
+		ID:             user.ID,
+		Email:          user.Email,
+		FullName:       user.Name,
+		Status:         user.Status,
+		Avatar:         user.Avatar,
+		HashedPassword: user.HashedPassword,
+		Role:           user.Role,
+		Salt:           user.Salt,
 	}
 }
