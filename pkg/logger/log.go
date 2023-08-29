@@ -1,7 +1,5 @@
 package logger
 
-type Fields map[string]interface{}
-
 // Log log interface
 type Log interface {
 	Print(v ...any)

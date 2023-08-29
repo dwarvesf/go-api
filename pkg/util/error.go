@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/dwarvesf/go-api/pkg/handler/v1/viewmodel"
+	"github.com/dwarvesf/go-api/pkg/handler/v1/view"
 	"github.com/dwarvesf/go-api/pkg/model"
 	"github.com/gin-gonic/gin"
 )
@@ -15,31 +15,30 @@ func HandleError(c *gin.Context, err error) {
 	c.JSON(e.Status, gin.H{
 		"status":  e.Status,
 		"code":    e.Code,
-		"message": e.Message,
+		"message": e.Err,
 	})
-
 }
 
-func tryParseError(err error) viewmodel.ErrorResponse {
+func tryParseError(err error) view.ErrorResponse {
 	var e model.Error
 	ok := errors.As(err, &e)
 	if ok {
-		return viewmodel.ErrorResponse{
-			Status:  e.Status,
-			Code:    e.Code,
-			Message: e.Message,
+		return view.ErrorResponse{
+			Status: e.Status,
+			Code:   e.Code,
+			Err:    e.Message,
 		}
 	}
 
-	var viewErr viewmodel.ErrorResponse
+	var viewErr view.ErrorResponse
 	ok = errors.As(err, &viewErr)
 	if ok {
 		return viewErr
 	}
 
-	return viewmodel.ErrorResponse{
-		Status:  http.StatusInternalServerError,
-		Code:    "INTERNAL_ERROR",
-		Message: err.Error(),
+	return view.ErrorResponse{
+		Status: http.StatusInternalServerError,
+		Code:   "INTERNAL_ERROR",
+		Err:    err.Error(),
 	}
 }

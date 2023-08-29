@@ -2,23 +2,29 @@ package testutil
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 
+	mw "github.com/dwarvesf/go-api/pkg/middleware"
 	"github.com/gin-gonic/gin"
 )
 
-// HttpMethod enum
-type HttpMethod string
+// HTTPMethod enum
+type HTTPMethod string
 
 const (
-	MethodGet    HttpMethod = "GET"
-	MethodPost   HttpMethod = "POST"
-	MethodPut    HttpMethod = "PUT"
-	MethodDelete HttpMethod = "Delete"
+	// MethodGet http method
+	MethodGet HTTPMethod = "GET"
+	// MethodPost http method
+	MethodPost HTTPMethod = "POST"
+	// MethodPut http method
+	MethodPut HTTPMethod = "PUT"
+	// MethodDelete http method
+	MethodDelete HTTPMethod = "Delete"
 )
 
 var defaultHeaders = map[string]string{
@@ -49,7 +55,7 @@ func updateHeaders(ctx *gin.Context, headers map[string]string) {
 }
 
 // NewRequest make a gin.Context request
-func NewRequest(w *httptest.ResponseRecorder, method HttpMethod, headers map[string]string, params []gin.Param, u url.Values, body interface{}) *gin.Context {
+func NewRequest(w *httptest.ResponseRecorder, method HTTPMethod, headers map[string]string, params []gin.Param, u url.Values, body interface{}) *gin.Context {
 	ctx := GinContext(w)
 
 	ctx.Request.Method = string(method)
@@ -79,4 +85,12 @@ func NewRequest(w *httptest.ResponseRecorder, method HttpMethod, headers map[str
 	}
 
 	return ctx
+}
+
+// UpdateJWT update the jwt token
+func UpdateJWT(ginCtx *gin.Context, userID int, role string) {
+
+	ctx := context.WithValue(ginCtx.Request.Context(), mw.UserIDCtxKey, userID)
+	ctx = context.WithValue(ctx, mw.RoleCtxKey, role)
+	ginCtx.Request = ginCtx.Request.WithContext(ctx)
 }

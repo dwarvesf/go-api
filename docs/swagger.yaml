@@ -1,4 +1,99 @@
 basePath: /api/v1
+definitions:
+  Auth:
+    properties:
+      accessToken:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+    required:
+    - accessToken
+    - email
+    - id
+    type: object
+  ErrorDetail:
+    properties:
+      error:
+        type: string
+      field:
+        type: string
+    required:
+    - error
+    - field
+    type: object
+  ErrorResponse:
+    properties:
+      code:
+        type: string
+      error:
+        type: string
+      errors:
+        items:
+          $ref: '#/definitions/ErrorDetail'
+        type: array
+      traceId:
+        type: string
+    required:
+    - code
+    - error
+    - traceId
+    type: object
+  LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  LoginResponse:
+    properties:
+      data:
+        $ref: '#/definitions/Auth'
+    type: object
+  Me:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+    required:
+    - email
+    - id
+    type: object
+  MeResponse:
+    properties:
+      data:
+        $ref: '#/definitions/Me'
+    type: object
+  MessageResponse:
+    properties:
+      message:
+        type: string
+    required:
+    - message
+    type: object
+  SignupRequest:
+    properties:
+      avatar:
+        type: string
+      email:
+        type: string
+      fullName:
+        type: string
+      password:
+        type: string
+      status:
+        type: string
+    required:
+    - email
+    - fullName
+    - password
+    type: object
 info:
   contact:
     email: andy@d.foundation
@@ -11,9 +106,106 @@ info:
   termsOfService: http://swagger.io/terms/
   title: APP API DOCUMENT
   version: v0.0.1
-paths: {}
+paths:
+  /portal/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login to portal by email
+      parameters:
+      - description: Body
+        in: body
+        name: Body
+        required: true
+        schema:
+          $ref: '#/definitions/LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Login to portal
+      tags:
+      - Auth
+  /portal/auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Signup
+      parameters:
+      - description: Body
+        in: body
+        name: Body
+        required: true
+        schema:
+          $ref: '#/definitions/SignupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Signup
+      tags:
+      - Auth
+  /portal/me:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve my information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/MeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Retrieve my information
+      tags:
+      - User
 securityDefinitions:
-  ApiKeyAuth:
+  BearerAuth:
     in: header
     name: Authorization
     type: apiKey
