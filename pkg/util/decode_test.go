@@ -6,28 +6,25 @@ import (
 )
 
 func TestParseEnvSecret(t *testing.T) {
-	testCases := []struct {
-		name         string
+	testCases := map[string]struct {
 		encodedToken string
 		wantValue    []byte
 		wantErr      bool
 	}{
-		{
-			name:         "Valid encoded token",
+		"Valid encoded token": {
 			encodedToken: "cGFzc3dvcmQ=",
 			wantValue:    []byte("password"),
 			wantErr:      false,
 		},
-		{
-			name:         "Invalid encoded token",
+		"Invalid encoded token": {
 			encodedToken: "not_base64_encoded",
 			wantValue:    nil,
 			wantErr:      true,
 		},
 	}
 
-	for _, tt := range testCases {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range testCases {
+		t.Run(name, func(t *testing.T) {
 			result, err := ParseEnvSecret(tt.encodedToken)
 
 			if (err != nil) != tt.wantErr {

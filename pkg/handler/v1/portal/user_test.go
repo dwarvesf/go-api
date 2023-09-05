@@ -11,7 +11,6 @@ import (
 	"github.com/dwarvesf/go-api/pkg/handler/v1/view"
 	"github.com/dwarvesf/go-api/pkg/logger"
 	"github.com/dwarvesf/go-api/pkg/model"
-	"github.com/dwarvesf/go-api/pkg/repository/orm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -30,13 +29,11 @@ func TestHandler_Me(t *testing.T) {
 		Status int
 		Body   string
 	}
-	tests := []struct {
-		name     string
+	tests := map[string]struct {
 		mocked   mocked
 		expected expected
 	}{
-		{
-			name: "success",
+		"success": {
 			mocked: mocked{
 				expUpdateJWT: true,
 				userID:       1,
@@ -52,7 +49,7 @@ func TestHandler_Me(t *testing.T) {
 			},
 		},
 	}
-	for _, tt := range tests {
+	for name, tt := range tests {
 		w := httptest.NewRecorder()
 		cfg := config.LoadTestConfig()
 		ginCtx := testutil.NewRequest(w, testutil.MethodGet, nil, nil, nil, nil)
@@ -68,7 +65,7 @@ func TestHandler_Me(t *testing.T) {
 		if tt.mocked.expGetUser {
 			ctrlMock.EXPECT().Me(mock.Anything).Return(tt.mocked.user, tt.mocked.userErr)
 		}
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(name, func(t *testing.T) {
 			h := Handler{
 				log:      logger.NewLogger(),
 				cfg:      cfg,
@@ -101,14 +98,12 @@ func TestHandler_UpdateUser(t *testing.T) {
 		Status int
 		Body   view.UserResponse
 	}
-	tests := []struct {
-		name     string
+	tests := map[string]struct {
 		args     args
 		mocked   mocked
 		expected expected
 	}{
-		{
-			name: "success",
+		"success": {
 			mocked: mocked{
 				expUpdateJWT:  true,
 				userID:        1,
@@ -135,7 +130,7 @@ func TestHandler_UpdateUser(t *testing.T) {
 			},
 		},
 	}
-	for _, tt := range tests {
+	for name, tt := range tests {
 		w := httptest.NewRecorder()
 		cfg := config.LoadTestConfig()
 		ginCtx := testutil.NewRequest(w, testutil.MethodPut, nil, nil, nil, tt.args.input)
@@ -151,7 +146,7 @@ func TestHandler_UpdateUser(t *testing.T) {
 		if tt.mocked.expUpdateUser {
 			ctrlMock.EXPECT().UpdateUser(mock.Anything, mock.Anything).Return(tt.mocked.user, tt.mocked.userErr)
 		}
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(name, func(t *testing.T) {
 			h := Handler{
 				log:      logger.NewLogger(),
 				cfg:      cfg,
@@ -174,7 +169,6 @@ func TestHandler_UpdatePassword(t *testing.T) {
 		userID            int
 		role              string
 		expUpdatePassword bool
-		user              *orm.User
 		userErr           error
 	}
 
@@ -186,22 +180,16 @@ func TestHandler_UpdatePassword(t *testing.T) {
 		Status int
 		Body   view.MessageResponse
 	}
-	tests := []struct {
-		name     string
+	tests := map[string]struct {
 		args     args
 		mocked   mocked
 		expected expected
 	}{
-		{
-			name: "success",
+		"success": {
 			mocked: mocked{
 				expUpdateJWT:      true,
 				userID:            1,
 				expUpdatePassword: true,
-				user: &orm.User{
-					ID:    1,
-					Email: "admin@email.com",
-				},
 			},
 			args: args{
 				input: view.UpdatePasswordRequest{
@@ -219,7 +207,7 @@ func TestHandler_UpdatePassword(t *testing.T) {
 			},
 		},
 	}
-	for _, tt := range tests {
+	for name, tt := range tests {
 		w := httptest.NewRecorder()
 		cfg := config.LoadTestConfig()
 		ginCtx := testutil.NewRequest(w, testutil.MethodPut, nil, nil, nil, tt.args.input)
@@ -235,7 +223,7 @@ func TestHandler_UpdatePassword(t *testing.T) {
 		if tt.mocked.expUpdatePassword {
 			ctrlMock.EXPECT().UpdatePassword(mock.Anything, mock.Anything).Return(tt.mocked.userErr)
 		}
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(name, func(t *testing.T) {
 			h := Handler{
 				log:      logger.NewLogger(),
 				cfg:      cfg,

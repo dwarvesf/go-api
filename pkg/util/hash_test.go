@@ -5,11 +5,11 @@ import (
 )
 
 func TestGenerateHashedKey(t *testing.T) {
-	tests := []struct {
+	tests := map[string]struct {
 		input    string
 		expected string
 	}{
-		{
+		"success": {
 			input:    "abcd1234",
 			expected: "$2a$10$0qtOvmMkMEYUlfoYy/8/..sdAaKVbiYhJRvRQ0wVMf54Gwkys4oWW", // Error case; don't check the actual hash value, as it changes every time
 		},
@@ -36,17 +36,17 @@ func TestGenerateHashedKey(t *testing.T) {
 }
 
 func TestIsValidPassword(t *testing.T) {
-	tests := []struct {
+	tests := map[string]struct {
 		password string
 		hashed   string
 		expected bool
 	}{
-		{
+		"success": {
 			password: "abcd1234",
 			hashed:   "$2a$10$0qtOvmMkMEYUlfoYy/8/..sdAaKVbiYhJRvRQ0wVMf54Gwkys4oWW",
 			expected: true,
 		},
-		{
+		"error": {
 			password: "wrongpassword",
 			hashed:   "$2a$10$0qtOvmMkMEYUlfoYy/8/..sdAaKVbiYhJRvRQ0wVMf54Gwkys4oWW",
 			expected: false,
