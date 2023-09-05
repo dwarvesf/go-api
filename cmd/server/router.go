@@ -6,6 +6,7 @@ import (
 	"github.com/dwarvesf/go-api/pkg/handler/v1/portal"
 	"github.com/dwarvesf/go-api/pkg/logger/monitor"
 	"github.com/dwarvesf/go-api/pkg/middleware"
+	"github.com/dwarvesf/go-api/pkg/realtime"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"     // swagger embed files
@@ -71,6 +72,10 @@ func publicHandler(r *gin.Engine, a App) {
 		portalGroup.POST("/auth/login", portalHandler.Login)
 		portalGroup.POST("/auth/signup", portalHandler.Signup)
 	}
+
+	apiV1.GET("/sse", realtime.SSEHeadersMiddleware(), func(ctx *gin.Context) {
+		a.realtimeServer.HandleConnection(ctx)
+	})
 }
 
 func authenticatedHandler(r *gin.Engine, a App) {

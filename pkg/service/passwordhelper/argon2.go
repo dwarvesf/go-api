@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-type arg2 struct {
+type argon2Impl struct {
 	memory      uint32
 	iterations  uint32
 	parallelism uint8
@@ -17,8 +17,8 @@ type arg2 struct {
 	keyLength   uint32
 }
 
-func newArgon2Default() *arg2 {
-	return &arg2{
+func newArgon2Default() *argon2Impl {
+	return &argon2Impl{
 		memory:      64 * 1024,
 		iterations:  3,
 		parallelism: 2,
@@ -27,7 +27,7 @@ func newArgon2Default() *arg2 {
 	}
 }
 
-func (h arg2) GenerateSalt() string {
+func (h argon2Impl) GenerateSalt() string {
 	var salt = make([]byte, h.saltLength)
 
 	_, err := io.ReadFull(rand.Reader, salt)
@@ -39,7 +39,7 @@ func (h arg2) GenerateSalt() string {
 	return base64.RawStdEncoding.EncodeToString(salt)
 }
 
-func (h arg2) Hash(password, salt string) (string, error) {
+func (h argon2Impl) Hash(password, salt string) (string, error) {
 	// Convert password string to byte slice
 	var passwordBytes = []byte(password)
 	saltBytes, err := base64.RawStdEncoding.DecodeString(salt)
@@ -52,19 +52,21 @@ func (h arg2) Hash(password, salt string) (string, error) {
 	return hashedStr, nil
 }
 
-func (h arg2) Compare(password, hashedPassword, salt string) bool {
+func (h argon2Impl) Compare(password, hashedPassword, salt string) bool {
 	saltBytes, err := base64.RawStdEncoding.DecodeString(salt)
 	if err != nil {
 		return false
 	}
+
 	otherHash := argon2.IDKey([]byte(password), saltBytes, h.iterations, h.memory, h.parallelism, h.keyLength)
+
 	hashedPasswordBytes, err := base64.RawStdEncoding.DecodeString(hashedPassword)
 	if err != nil {
 		return false
 	}
+
 	if subtle.ConstantTimeCompare(hashedPasswordBytes, otherHash) == 1 {
 		return true
 	}
-
 	return false
 }
