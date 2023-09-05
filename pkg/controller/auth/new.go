@@ -29,6 +29,6 @@ func NewAuthController(cfg config.Config, r *repository.Repo) Controller {
 		repo:           r,
 		jwtHelper:      jwthelper.NewHelper(cfg.SecretKey),
 		cfg:            cfg,
-		passwordHelper: passwordhelper.NewHelper(),
+		passwordHelper: passwordhelper.NewScrypt(),
 	}
 }

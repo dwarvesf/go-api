@@ -1,7 +1,6 @@
 package user
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/dwarvesf/go-api/pkg/model"
@@ -45,6 +44,7 @@ func Test_repo_GetByID(t *testing.T) {
 					Avatar:         u.Avatar,
 					HashedPassword: u.HashedPassword,
 					Role:           u.Role,
+					Salt:           u.Salt,
 				},
 				wantErr: false,
 			},
@@ -64,9 +64,7 @@ func Test_repo_GetByID(t *testing.T) {
 					t.Errorf("repo.GetByID() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				if !reflect.DeepEqual(got, tt.want) {
-					t.Errorf("repo.GetByID() = %v, want %v", got, tt.want)
-				}
+				require.Equal(t, tt.want, got)
 			})
 		}
 	})
