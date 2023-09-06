@@ -8,4 +8,5 @@ type Pagination struct {
 	TotalPages   int
 	Offset       int
 	Sort         string
+	HasNext      bool
 }

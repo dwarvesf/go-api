@@ -76,6 +76,48 @@ func (_c *Controller_Me_Call) RunAndReturn(run func(context.Context) (*model.Use
 	return _c
 }
 
+// SentMail provides a mock function with given fields: ctx
+func (_m *Controller) SentMail(ctx context.Context) error {
+	ret := _m.Called(ctx)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context) error); ok {
+		r0 = rf(ctx)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// Controller_SentMail_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SentMail'
+type Controller_SentMail_Call struct {
+	*mock.Call
+}
+
+// SentMail is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *Controller_Expecter) SentMail(ctx interface{}) *Controller_SentMail_Call {
+	return &Controller_SentMail_Call{Call: _e.mock.On("SentMail", ctx)}
+}
+
+func (_c *Controller_SentMail_Call) Run(run func(ctx context.Context)) *Controller_SentMail_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *Controller_SentMail_Call) Return(_a0 error) *Controller_SentMail_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *Controller_SentMail_Call) RunAndReturn(run func(context.Context) error) *Controller_SentMail_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // UpdatePassword provides a mock function with given fields: ctx, _a1
 func (_m *Controller) UpdatePassword(ctx context.Context, _a1 model.UpdatePasswordRequest) error {
 	ret := _m.Called(ctx, _a1)

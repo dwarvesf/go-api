@@ -12,6 +12,9 @@ MOCKERY_IMAGE = vektra/mockery:$(MOCKERY_VERSION)
 dev: setup
 	air -c .air.toml
 
+job-sentmail:
+	go run cmd/jobs/sentmail/main.go
+
 setup:
 	@go install github.com/cosmtrek/air@$(AIR_VERSION)
 	@go install github.com/vektra/mockery/v2@$(MOCKERY_VERSION)

@@ -30,14 +30,12 @@ func TestHandler_Login(t *testing.T) {
 		Body   string
 	}
 
-	tests := []struct {
-		name     string
+	tests := map[string]struct {
 		mocked   mocked
 		args     args
 		expected expected
 	}{
-		{
-			name: "success",
+		"success": {
 			mocked: mocked{
 				expLoginCalled: true,
 				loginResponse: &model.LoginResponse{
@@ -58,8 +56,7 @@ func TestHandler_Login(t *testing.T) {
 				Body:   "token",
 			},
 		},
-		{
-			name: "error",
+		"error": {
 			mocked: mocked{
 				expLoginCalled: true,
 				loginResponse:  nil,
@@ -76,8 +73,7 @@ func TestHandler_Login(t *testing.T) {
 				Body:   "Wrong username or password",
 			},
 		},
-		{
-			name: "bad request",
+		"bad request": {
 			mocked: mocked{
 				expLoginCalled: false,
 			},
@@ -93,7 +89,7 @@ func TestHandler_Login(t *testing.T) {
 			},
 		},
 	}
-	for _, tt := range tests {
+	for name, tt := range tests {
 		w := httptest.NewRecorder()
 		ginCtx := testutil.NewRequest(w, testutil.MethodPost, nil, nil, nil, tt.args.input)
 
@@ -104,7 +100,7 @@ func TestHandler_Login(t *testing.T) {
 		if tt.mocked.expLoginCalled {
 			ctrlMock.EXPECT().Login(mock.Anything, mock.Anything).Return(tt.mocked.loginResponse, tt.mocked.loginErr)
 		}
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(name, func(t *testing.T) {
 			h := Handler{
 				log:      logger.NewLogger(),
 				cfg:      config.LoadTestConfig(),
@@ -132,14 +128,12 @@ func TestHandler_Signup(t *testing.T) {
 		Body   view.MessageResponse
 	}
 
-	tests := []struct {
-		name     string
+	tests := map[string]struct {
 		mocked   mocked
 		args     args
 		expected expected
 	}{
-		{
-			name: "success",
+		"success": {
 			mocked: mocked{
 				expSignupCalled: true,
 				signupErr:       nil,
@@ -163,7 +157,7 @@ func TestHandler_Signup(t *testing.T) {
 			},
 		},
 	}
-	for _, tt := range tests {
+	for name, tt := range tests {
 		w := httptest.NewRecorder()
 		ginCtx := testutil.NewRequest(w, testutil.MethodPost, nil, nil, nil, tt.args.input)
 
@@ -174,7 +168,7 @@ func TestHandler_Signup(t *testing.T) {
 		if tt.mocked.expSignupCalled {
 			ctrlMock.EXPECT().Signup(mock.Anything, mock.Anything).Return(tt.mocked.signupErr)
 		}
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(name, func(t *testing.T) {
 			h := Handler{
 				log:      logger.NewLogger(),
 				cfg:      config.LoadTestConfig(),

@@ -11,14 +11,12 @@ import (
 
 func TestGenerateJWTToken(t *testing.T) {
 	// Test cases
-	testCases := []struct {
-		name      string
+	testCases := map[string]struct {
 		secret    string
 		claims    jwt.MapClaims
 		expectErr bool
 	}{
-		{
-			name:   "ValidToken",
+		"ValidToken": {
 			secret: "secret_key",
 			claims: jwt.MapClaims{
 				"sub": "user123",
@@ -29,8 +27,8 @@ func TestGenerateJWTToken(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
 			// Create a new instance of Helper with the test secret
 			helper := NewHelper(tc.secret)
 
@@ -101,15 +99,13 @@ func Test_impl_ValidateToken(t *testing.T) {
 	type args struct {
 		token string
 	}
-	tests := []struct {
-		name    string
+	tests := map[string]struct {
 		fields  fields
 		args    args
 		want    map[string]interface{}
 		wantErr bool
 	}{
-		{
-			name: "success",
+		"success": {
 			fields: fields{
 				Secret: "secret",
 			},
@@ -120,8 +116,7 @@ func Test_impl_ValidateToken(t *testing.T) {
 				"exp": float64(validTime.Unix()),
 			},
 		},
-		{
-			name: "invalid token",
+		"invalid token": {
 			fields: fields{
 				Secret: "secret",
 			},
@@ -131,8 +126,8 @@ func Test_impl_ValidateToken(t *testing.T) {
 			wantErr: true,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			h := impl{
 				Secret: tt.fields.Secret,
 			}

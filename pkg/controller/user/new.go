@@ -13,6 +13,7 @@ type Controller interface {
 	Me(ctx context.Context) (*model.User, error)
 	UpdateUser(ctx context.Context, user model.UpdateUserRequest) (*model.User, error)
 	UpdatePassword(ctx context.Context, user model.UpdatePasswordRequest) error
+	SentMail(ctx context.Context) error
 }
 
 type impl struct {

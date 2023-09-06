@@ -59,6 +59,48 @@ func (_c *ENV_GetBool_Call) RunAndReturn(run func(string) bool) *ENV_GetBool_Cal
 	return _c
 }
 
+// GetInt provides a mock function with given fields: _a0
+func (_m *ENV) GetInt(_a0 string) int {
+	ret := _m.Called(_a0)
+
+	var r0 int
+	if rf, ok := ret.Get(0).(func(string) int); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+
+	return r0
+}
+
+// ENV_GetInt_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetInt'
+type ENV_GetInt_Call struct {
+	*mock.Call
+}
+
+// GetInt is a helper method to define mock.On call
+//   - _a0 string
+func (_e *ENV_Expecter) GetInt(_a0 interface{}) *ENV_GetInt_Call {
+	return &ENV_GetInt_Call{Call: _e.mock.On("GetInt", _a0)}
+}
+
+func (_c *ENV_GetInt_Call) Run(run func(_a0 string)) *ENV_GetInt_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ENV_GetInt_Call) Return(_a0 int) *ENV_GetInt_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ENV_GetInt_Call) RunAndReturn(run func(string) int) *ENV_GetInt_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetString provides a mock function with given fields: _a0
 func (_m *ENV) GetString(_a0 string) string {
 	ret := _m.Called(_a0)

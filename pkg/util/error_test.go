@@ -20,13 +20,12 @@ func TestHandleError(t *testing.T) {
 		Status int
 		Body   string
 	}
-	tests := []struct {
+	tests := map[string]struct {
 		name     string
 		args     args
 		expected expected
 	}{
-		{
-			name: "valid error",
+		"valid error": {
 			args: args{
 				err: model.Error{Status: 400, Code: "bad_request", Message: "bad request"},
 			},
@@ -35,8 +34,7 @@ func TestHandleError(t *testing.T) {
 				Body:   "bad request",
 			},
 		},
-		{
-			name: "valid pointer error",
+		"valid pointer error": {
 			args: args{
 				err: sql.ErrNoRows,
 			},
@@ -47,10 +45,10 @@ func TestHandleError(t *testing.T) {
 			},
 		},
 	}
-	for _, tt := range tests {
+	for name, tt := range tests {
 		w := httptest.NewRecorder()
 		ginCtx := testutil.NewRequest(w, testutil.MethodGet, nil, nil, nil, nil)
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(name, func(t *testing.T) {
 			HandleError(ginCtx, tt.args.err)
 
 			assert.Equal(t, tt.expected.Status, w.Code)
@@ -64,13 +62,12 @@ func Test_tryParseError(t *testing.T) {
 	type args struct {
 		err error
 	}
-	tests := []struct {
+	tests := map[string]struct {
 		name string
 		args args
 		want view.ErrorResponse
 	}{
-		{
-			name: "valid error",
+		"valid error": {
 			args: args{
 				err: model.Error{Status: 400, Code: "WRONG_CREDENTIALS", Message: "Wrong username or password"},
 			},
@@ -80,8 +77,7 @@ func Test_tryParseError(t *testing.T) {
 				Err:    "Wrong username or password",
 			},
 		},
-		{
-			name: "valid stack error",
+		"valid stack error": {
 			args: args{
 				err: errors.WithStack(model.NewError(400, "bad_request", "bad request")),
 			},
@@ -91,8 +87,7 @@ func Test_tryParseError(t *testing.T) {
 				Err:    "bad request",
 			},
 		},
-		{
-			name: "valid viewmodel error",
+		"valid viewmodel error": {
 			args: args{
 				err: view.ErrorResponse{
 					Status: 400,
@@ -107,8 +102,8 @@ func Test_tryParseError(t *testing.T) {
 			},
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			got := tryParseError(tt.args.err)
 			assert.Equal(t, tt.want, got)
 		})
