@@ -5,6 +5,7 @@ import (
 
 	"github.com/dwarvesf/go-api/pkg/middleware"
 	"github.com/dwarvesf/go-api/pkg/model"
+	"github.com/dwarvesf/go-api/pkg/repository/db"
 )
 
 func (c *impl) UpdateUser(ctx context.Context, user model.UpdateUserRequest) (*model.User, error) {
@@ -13,7 +14,8 @@ func (c *impl) UpdateUser(ctx context.Context, user model.UpdateUserRequest) (*m
 		return nil, model.ErrInvalidToken
 	}
 
-	u, err := c.repo.User.GetByID(ctx, uID)
+	dbCtx := db.FromContext(ctx)
+	u, err := c.repo.User.GetByID(dbCtx, uID)
 	if err != nil {
 		return nil, err
 	}
@@ -21,7 +23,7 @@ func (c *impl) UpdateUser(ctx context.Context, user model.UpdateUserRequest) (*m
 	u.Avatar = user.Avatar
 	u.FullName = user.FullName
 
-	updated, err := c.repo.User.Update(ctx, u)
+	updated, err := c.repo.User.Update(dbCtx, uID, user)
 	if err != nil {
 		return nil, err
 	}

@@ -199,7 +199,7 @@ func TestHandler_UpdatePassword(t *testing.T) {
 				userID:            1,
 				expUpdatePassword: true,
 				user: &orm.User{
-					ID:    "1",
+					ID:    1,
 					Email: "admin@email.com",
 				},
 			},

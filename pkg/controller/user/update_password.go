@@ -5,6 +5,7 @@ import (
 
 	"github.com/dwarvesf/go-api/pkg/middleware"
 	"github.com/dwarvesf/go-api/pkg/model"
+	"github.com/dwarvesf/go-api/pkg/repository/db"
 )
 
 func (c impl) UpdatePassword(ctx context.Context, user model.UpdatePasswordRequest) error {
@@ -12,15 +13,16 @@ func (c impl) UpdatePassword(ctx context.Context, user model.UpdatePasswordReque
 	if err != nil {
 		return model.ErrInvalidToken
 	}
-	u, err := c.repo.User.GetByID(ctx, uID)
+	dbCtx := db.FromContext(ctx)
+	u, err := c.repo.User.GetByID(dbCtx, uID)
 	if err != nil {
 		return err
 	}
 
-	if u.Password != user.OldPassword {
+	if u.HashedPassword != user.OldPassword {
 		return model.ErrInvalidCredentials
 	}
 
-	err = c.repo.User.UpdatePassword(ctx, uID, user.NewPassword)
+	err = c.repo.User.UpdatePassword(dbCtx, uID, user.NewPassword)
 	return err
 }

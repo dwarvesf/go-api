@@ -4,6 +4,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	serverVersion = "0.0.1"
+)
+
 // Loader load config from reader into Viper
 type Loader interface {
 	Load(viper.Viper) (*viper.Viper, error)
@@ -19,6 +23,9 @@ type Config struct {
 	Port           string
 	AllowedOrigins string
 	SecretKey      string
+	DatabaseURL    string
+	DBMaxOpenConns int
+	DBMaxIdleConns int
 
 	// log system
 	SentryDSN string
@@ -33,6 +40,7 @@ func (c *Config) IsLocal() bool {
 type ENV interface {
 	GetBool(string) bool
 	GetString(string) string
+	GetInt(string) int
 }
 
 // Generate generate config from ENV
@@ -47,6 +55,9 @@ func Generate(v ENV) *Config {
 		BaseURL:        v.GetString("BASE_URL"),
 		Port:           v.GetString("PORT"),
 		AllowedOrigins: v.GetString("ALLOWED_ORIGINS"),
+		DatabaseURL:    v.GetString("DATABASE_URL"),
+		DBMaxOpenConns: v.GetInt("DB_MAX_OPEN_CONNS"),
+		DBMaxIdleConns: v.GetInt("DB_MAX_IDLE_CONNS"),
 	}
 }
 
@@ -66,8 +77,10 @@ func LoadConfig(loaders []Loader) *Config {
 	v.SetDefault("PORT", "3000")
 	v.SetDefault("ENV", "prod")
 	v.SetDefault("ALLOWED_ORIGINS", "*")
-	v.SetDefault("VERSION", "0.0.1")
+	v.SetDefault("VERSION", serverVersion)
 	v.SetDefault("SERVER_NAME", "local")
+	v.SetDefault("DB_MAX_OPEN_CONNS", 10)
+	v.SetDefault("DB_MAX_IDLE_CONNS", 5)
 
 	for idx := range loaders {
 		newV, err := loaders[idx].Load(*v)
@@ -82,6 +95,10 @@ func LoadConfig(loaders []Loader) *Config {
 // LoadTestConfig load test config
 func LoadTestConfig() Config {
 	return Config{
-		Port: "4000",
+		App:         "api-go",
+		Env:         "test",
+		Version:     serverVersion,
+		DatabaseURL: "postgres://postgres:postgres@localhost:5433/go-api-db-test?sslmode=disable",
+		Port:        "4000",
 	}
 }

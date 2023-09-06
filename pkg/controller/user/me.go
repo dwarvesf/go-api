@@ -5,6 +5,7 @@ import (
 
 	"github.com/dwarvesf/go-api/pkg/middleware"
 	"github.com/dwarvesf/go-api/pkg/model"
+	"github.com/dwarvesf/go-api/pkg/repository/db"
 )
 
 func (c *impl) Me(ctx context.Context) (*model.User, error) {
@@ -13,7 +14,9 @@ func (c *impl) Me(ctx context.Context) (*model.User, error) {
 		return nil, model.ErrInvalidToken
 	}
 
-	u, err := c.repo.User.GetByID(ctx, uID)
+	dbCtx := db.FromContext(ctx)
+
+	u, err := c.repo.User.GetByID(dbCtx, uID)
 	if err != nil {
 		return nil, err
 	}

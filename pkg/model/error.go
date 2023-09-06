@@ -30,6 +30,13 @@ var (
 		Code:    "NOT_FOUND",
 		Message: "not found",
 	}
+
+	// ErrEmailExisted is the error for email existed
+	ErrEmailExisted = Error{
+		Status:  http.StatusBadRequest,
+		Code:    "EMAIL_EXISTED",
+		Message: "email existed",
+	}
 )
 
 // Error in server

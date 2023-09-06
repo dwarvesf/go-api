@@ -69,7 +69,7 @@ func (h Handler) Signup(c *gin.Context) {
 	err := h.authCtrl.Signup(c.Request.Context(), model.SignupRequest{
 		Email:    req.Email,
 		Password: req.Password,
-		FullName: req.FullName,
+		Name:     req.FullName,
 	})
 	if err != nil {
 		h.log.Error(err)

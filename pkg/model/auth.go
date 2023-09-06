@@ -15,8 +15,12 @@ type LoginResponse struct {
 
 // SignupRequest represent the signup request
 type SignupRequest struct {
-	Email    string
-	Password string
-	FullName string
-	Avatar   string
+	Email          string
+	Password       string
+	Name           string
+	Avatar         string
+	Salt           string
+	HashedPassword string
+	Role           Role
+	Status         Status
 }

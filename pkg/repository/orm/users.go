@@ -23,45 +23,93 @@ import (
 
 // User is an object representing the database table.
 type User struct {
-	ID        string    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Email     string    `boil:"email" json:"email" toml:"email" yaml:"email"`
-	Password  string    `boil:"password" json:"password" toml:"password" yaml:"password"`
-	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	ID             int       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Status         string    `boil:"status" json:"status" toml:"status" yaml:"status"`
+	Email          string    `boil:"email" json:"email" toml:"email" yaml:"email"`
+	Name           string    `boil:"name" json:"name" toml:"name" yaml:"name"`
+	HashedPassword string    `boil:"hashed_password" json:"hashed_password" toml:"hashed_password" yaml:"hashed_password"`
+	Salt           string    `boil:"salt" json:"salt" toml:"salt" yaml:"salt"`
+	Avatar         string    `boil:"avatar" json:"avatar" toml:"avatar" yaml:"avatar"`
+	Role           string    `boil:"role" json:"role" toml:"role" yaml:"role"`
+	CreatedAt      time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt      time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
-} // @name User
+}
 
 var UserColumns = struct {
-	ID        string
-	Email     string
-	Password  string
-	CreatedAt string
-	UpdatedAt string
+	ID             string
+	Status         string
+	Email          string
+	Name           string
+	HashedPassword string
+	Salt           string
+	Avatar         string
+	Role           string
+	CreatedAt      string
+	UpdatedAt      string
 }{
-	ID:        "id",
-	Email:     "email",
-	Password:  "password",
-	CreatedAt: "created_at",
-	UpdatedAt: "updated_at",
+	ID:             "id",
+	Status:         "status",
+	Email:          "email",
+	Name:           "name",
+	HashedPassword: "hashed_password",
+	Salt:           "salt",
+	Avatar:         "avatar",
+	Role:           "role",
+	CreatedAt:      "created_at",
+	UpdatedAt:      "updated_at",
 }
 
 var UserTableColumns = struct {
-	ID        string
-	Email     string
-	Password  string
-	CreatedAt string
-	UpdatedAt string
+	ID             string
+	Status         string
+	Email          string
+	Name           string
+	HashedPassword string
+	Salt           string
+	Avatar         string
+	Role           string
+	CreatedAt      string
+	UpdatedAt      string
 }{
-	ID:        "users.id",
-	Email:     "users.email",
-	Password:  "users.password",
-	CreatedAt: "users.created_at",
-	UpdatedAt: "users.updated_at",
+	ID:             "users.id",
+	Status:         "users.status",
+	Email:          "users.email",
+	Name:           "users.name",
+	HashedPassword: "users.hashed_password",
+	Salt:           "users.salt",
+	Avatar:         "users.avatar",
+	Role:           "users.role",
+	CreatedAt:      "users.created_at",
+	UpdatedAt:      "users.updated_at",
 }
 
 // Generated where
+
+type whereHelperint struct{ field string }
+
+func (w whereHelperint) EQ(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint) NEQ(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint) LT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint) LTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint) GT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint) GTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperint) IN(slice []int) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperint) NIN(slice []int) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
 
 type whereHelpertime_Time struct{ field string }
 
@@ -85,17 +133,27 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 }
 
 var UserWhere = struct {
-	ID        whereHelperstring
-	Email     whereHelperstring
-	Password  whereHelperstring
-	CreatedAt whereHelpertime_Time
-	UpdatedAt whereHelpertime_Time
+	ID             whereHelperint
+	Status         whereHelperstring
+	Email          whereHelperstring
+	Name           whereHelperstring
+	HashedPassword whereHelperstring
+	Salt           whereHelperstring
+	Avatar         whereHelperstring
+	Role           whereHelperstring
+	CreatedAt      whereHelpertime_Time
+	UpdatedAt      whereHelpertime_Time
 }{
-	ID:        whereHelperstring{field: "\"users\".\"id\""},
-	Email:     whereHelperstring{field: "\"users\".\"email\""},
-	Password:  whereHelperstring{field: "\"users\".\"password\""},
-	CreatedAt: whereHelpertime_Time{field: "\"users\".\"created_at\""},
-	UpdatedAt: whereHelpertime_Time{field: "\"users\".\"updated_at\""},
+	ID:             whereHelperint{field: "\"users\".\"id\""},
+	Status:         whereHelperstring{field: "\"users\".\"status\""},
+	Email:          whereHelperstring{field: "\"users\".\"email\""},
+	Name:           whereHelperstring{field: "\"users\".\"name\""},
+	HashedPassword: whereHelperstring{field: "\"users\".\"hashed_password\""},
+	Salt:           whereHelperstring{field: "\"users\".\"salt\""},
+	Avatar:         whereHelperstring{field: "\"users\".\"avatar\""},
+	Role:           whereHelperstring{field: "\"users\".\"role\""},
+	CreatedAt:      whereHelpertime_Time{field: "\"users\".\"created_at\""},
+	UpdatedAt:      whereHelpertime_Time{field: "\"users\".\"updated_at\""},
 }
 
 // UserRels is where relationship names are stored.
@@ -115,9 +173,9 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "email", "password", "created_at", "updated_at"}
-	userColumnsWithoutDefault = []string{"id", "email", "password"}
-	userColumnsWithDefault    = []string{"created_at", "updated_at"}
+	userAllColumns            = []string{"id", "status", "email", "name", "hashed_password", "salt", "avatar", "role", "created_at", "updated_at"}
+	userColumnsWithoutDefault = []string{"email", "name", "hashed_password", "salt"}
+	userColumnsWithDefault    = []string{"id", "status", "avatar", "role", "created_at", "updated_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 	userGeneratedColumns      = []string{}
 )
@@ -226,7 +284,7 @@ func Users(mods ...qm.QueryMod) userQuery {
 
 // FindUser retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindUser(ctx context.Context, exec boil.ContextExecutor, iD string, selectCols ...string) (*User, error) {
+func FindUser(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*User, error) {
 	userObj := &User{}
 
 	sel := "*"
@@ -710,7 +768,7 @@ func (o *UserSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) er
 }
 
 // UserExists checks if the User row exists.
-func UserExists(ctx context.Context, exec boil.ContextExecutor, iD string) (bool, error) {
+func UserExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"users\" where \"id\"=$1 limit 1)"
 

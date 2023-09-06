@@ -7,6 +7,7 @@ import (
 	"github.com/dwarvesf/go-api/pkg/model"
 	"github.com/dwarvesf/go-api/pkg/repository"
 	"github.com/dwarvesf/go-api/pkg/service/jwthelper"
+	"github.com/dwarvesf/go-api/pkg/service/passwordhelper"
 )
 
 // Controller auth controller
@@ -16,16 +17,18 @@ type Controller interface {
 }
 
 type impl struct {
-	repo      *repository.Repo
-	jwtHelper jwthelper.Helper
-	cfg       config.Config
+	repo           *repository.Repo
+	jwtHelper      jwthelper.Helper
+	cfg            config.Config
+	passwordHelper passwordhelper.Helper
 }
 
 // NewAuthController new auth controller
 func NewAuthController(cfg config.Config, r *repository.Repo) Controller {
 	return &impl{
-		repo:      r,
-		jwtHelper: jwthelper.NewHelper(cfg.SecretKey),
-		cfg:       cfg,
+		repo:           r,
+		jwtHelper:      jwthelper.NewHelper(cfg.SecretKey),
+		cfg:            cfg,
+		passwordHelper: passwordhelper.NewScrypt(),
 	}
 }

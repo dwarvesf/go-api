@@ -7,16 +7,18 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/dwarvesf/go-api/pkg/model"
+	"github.com/dwarvesf/go-api/pkg/repository/db"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 func (c impl) Login(ctx context.Context, req model.LoginRequest) (*model.LoginResponse, error) {
-	user, err := c.repo.User.GetByEmail(ctx, req.Email)
+	dbCtx := db.FromContext(ctx)
+	user, err := c.repo.User.GetByEmail(dbCtx, req.Email)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	if user.Password != req.Password {
+	if !c.passwordHelper.Compare(req.Password, user.HashedPassword, user.Salt) {
 		return nil, model.ErrInvalidCredentials
 	}
 

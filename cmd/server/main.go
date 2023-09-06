@@ -12,6 +12,7 @@ import (
 	"github.com/dwarvesf/go-api/pkg/config"
 	"github.com/dwarvesf/go-api/pkg/logger"
 	"github.com/dwarvesf/go-api/pkg/repository"
+	"github.com/dwarvesf/go-api/pkg/repository/db"
 	"github.com/dwarvesf/go-api/pkg/service"
 )
 
@@ -50,6 +51,11 @@ func main() {
 		cfg:     cfg,
 		service: service.New(cfg),
 		repo:    repository.NewRepo(),
+	}
+
+	_, err = db.Init(*cfg)
+	if err != nil {
+		l.Fatal(err, "failed to init db")
 	}
 
 	// Server
