@@ -73,7 +73,7 @@ func DefaultConfigLoaders() []Loader {
 // LoadConfig load config from loader list
 func LoadConfig(loaders []Loader) *Config {
 	v := viper.New()
-	v.SetDefault("APP", "api-go")
+	v.SetDefault("APP", "go-api")
 	v.SetDefault("PORT", "3000")
 	v.SetDefault("ENV", "prod")
 	v.SetDefault("ALLOWED_ORIGINS", "*")
@@ -95,7 +95,7 @@ func LoadConfig(loaders []Loader) *Config {
 // LoadTestConfig load test config
 func LoadTestConfig() Config {
 	return Config{
-		App:         "api-go",
+		App:         "go-api",
 		Env:         "test",
 		Version:     serverVersion,
 		DatabaseURL: "postgres://postgres:postgres@localhost:5433/go-api-db-test?sslmode=disable",
