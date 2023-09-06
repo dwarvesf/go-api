@@ -19,7 +19,7 @@ func Test_impl_SentMail(t *testing.T) {
 	type mocked struct {
 		uID              int
 		expGetListCalled bool
-		users            *model.UserList
+		users            *model.ListResult[model.User]
 		GetListErr       error
 		countCalled      bool
 		countErr         error
@@ -34,7 +34,7 @@ func Test_impl_SentMail(t *testing.T) {
 			mocked: mocked{
 				uID:              1,
 				expGetListCalled: true,
-				users: &model.UserList{
+				users: &model.ListResult[model.User]{
 					Pagination: model.Pagination{
 						Page:         1,
 						PageSize:     10,
@@ -44,7 +44,7 @@ func Test_impl_SentMail(t *testing.T) {
 						Sort:         "",
 						HasNext:      false,
 					},
-					Data: []*model.User{
+					Data: []model.User{
 						{
 							ID:             1,
 							Email:          "admin@d.foundation",
@@ -95,7 +95,7 @@ func Test_impl_SentMail(t *testing.T) {
 			if tt.mocked.expGetListCalled {
 				userRepoMock.
 					EXPECT().
-					GetList(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+					GetList(mock.Anything, mock.Anything).
 					Return(tt.mocked.users, tt.mocked.GetListErr)
 			}
 

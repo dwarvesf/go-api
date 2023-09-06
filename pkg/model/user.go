@@ -43,9 +43,3 @@ type User struct {
 	Avatar         string
 	Role           string
 }
-
-// UserList represent the user list
-type UserList struct {
-	Pagination Pagination
-	Data       []*User
-}

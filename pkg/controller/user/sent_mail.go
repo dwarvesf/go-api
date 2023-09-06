@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/dwarvesf/go-api/pkg/model"
 	"github.com/dwarvesf/go-api/pkg/repository/db"
 )
 
@@ -16,7 +17,12 @@ func (c *impl) SentMail(ctx context.Context) error {
 	page := 1
 	// while has next page
 	for hashNext {
-		userList, err := c.repo.User.GetList(dbCtx, page, pageSize, "", "")
+		userList, err := c.repo.User.GetList(dbCtx,
+			model.ListQuery{
+				Page:     page,
+				PageSize: pageSize,
+			},
+		)
 		if err != nil {
 			return err
 		}

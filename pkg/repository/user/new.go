@@ -8,9 +8,9 @@ import (
 
 // Repo represent the user
 type Repo interface {
-	GetList(ctx db.Context, page int, pageSize int, sort string, query string) (*model.UserList, error)
+	GetByID(ctx db.Context, uID int) (*model.User, error)
+	GetList(ctx db.Context, q model.ListQuery) (*model.ListResult[model.User], error)
 	Count(ctx db.Context) (int64, error)
-	GetByID(ctx db.Context, id int) (*model.User, error)
 	GetByEmail(ctx db.Context, email string) (*model.User, error)
 	Create(ctx db.Context, user model.SignupRequest) (*model.User, error)
 	Update(ctx db.Context, uID int, user model.UpdateUserRequest) (*model.User, error)

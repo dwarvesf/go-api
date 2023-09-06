@@ -239,25 +239,25 @@ func (_c *Repo_GetByID_Call) RunAndReturn(run func(db.Context, int) (*model.User
 	return _c
 }
 
-// GetList provides a mock function with given fields: ctx, page, pageSize, sort, query
-func (_m *Repo) GetList(ctx db.Context, page int, pageSize int, sort string, query string) (*model.UserList, error) {
-	ret := _m.Called(ctx, page, pageSize, sort, query)
+// GetList provides a mock function with given fields: ctx, q
+func (_m *Repo) GetList(ctx db.Context, q model.ListQuery) (*model.ListResult[model.User], error) {
+	ret := _m.Called(ctx, q)
 
-	var r0 *model.UserList
+	var r0 *model.ListResult[model.User]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(db.Context, int, int, string, string) (*model.UserList, error)); ok {
-		return rf(ctx, page, pageSize, sort, query)
+	if rf, ok := ret.Get(0).(func(db.Context, model.ListQuery) (*model.ListResult[model.User], error)); ok {
+		return rf(ctx, q)
 	}
-	if rf, ok := ret.Get(0).(func(db.Context, int, int, string, string) *model.UserList); ok {
-		r0 = rf(ctx, page, pageSize, sort, query)
+	if rf, ok := ret.Get(0).(func(db.Context, model.ListQuery) *model.ListResult[model.User]); ok {
+		r0 = rf(ctx, q)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.UserList)
+			r0 = ret.Get(0).(*model.ListResult[model.User])
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(db.Context, int, int, string, string) error); ok {
-		r1 = rf(ctx, page, pageSize, sort, query)
+	if rf, ok := ret.Get(1).(func(db.Context, model.ListQuery) error); ok {
+		r1 = rf(ctx, q)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -272,27 +272,24 @@ type Repo_GetList_Call struct {
 
 // GetList is a helper method to define mock.On call
 //   - ctx db.Context
-//   - page int
-//   - pageSize int
-//   - sort string
-//   - query string
-func (_e *Repo_Expecter) GetList(ctx interface{}, page interface{}, pageSize interface{}, sort interface{}, query interface{}) *Repo_GetList_Call {
-	return &Repo_GetList_Call{Call: _e.mock.On("GetList", ctx, page, pageSize, sort, query)}
+//   - q model.ListQuery
+func (_e *Repo_Expecter) GetList(ctx interface{}, q interface{}) *Repo_GetList_Call {
+	return &Repo_GetList_Call{Call: _e.mock.On("GetList", ctx, q)}
 }
 
-func (_c *Repo_GetList_Call) Run(run func(ctx db.Context, page int, pageSize int, sort string, query string)) *Repo_GetList_Call {
+func (_c *Repo_GetList_Call) Run(run func(ctx db.Context, q model.ListQuery)) *Repo_GetList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(db.Context), args[1].(int), args[2].(int), args[3].(string), args[4].(string))
+		run(args[0].(db.Context), args[1].(model.ListQuery))
 	})
 	return _c
 }
 
-func (_c *Repo_GetList_Call) Return(_a0 *model.UserList, _a1 error) *Repo_GetList_Call {
+func (_c *Repo_GetList_Call) Return(_a0 *model.ListResult[model.User], _a1 error) *Repo_GetList_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *Repo_GetList_Call) RunAndReturn(run func(db.Context, int, int, string, string) (*model.UserList, error)) *Repo_GetList_Call {
+func (_c *Repo_GetList_Call) RunAndReturn(run func(db.Context, model.ListQuery) (*model.ListResult[model.User], error)) *Repo_GetList_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -23,6 +23,7 @@ func CalculatePagination(totalRecords int, page int, pageSize int) (*model.Pagin
 	if pageSize <= 0 {
 		pageSize = defaultPageSize
 	}
+	hasNextRecords := totalRecords > page*pageSize
 
 	return &model.Pagination{
 		PageSize:     pageSize,
@@ -30,6 +31,7 @@ func CalculatePagination(totalRecords int, page int, pageSize int) (*model.Pagin
 		TotalRecords: totalRecords,
 		TotalPages:   calculateTotalPages(totalRecords, pageSize),
 		Offset:       calculateOffset(page, pageSize),
+		HasNext:      hasNextRecords,
 	}, nil
 }
 
