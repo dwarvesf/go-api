@@ -400,7 +400,7 @@ func Test_repo_GetList(t *testing.T) {
 		}
 		tests := map[string]struct {
 			args    args
-			want    *model.UserList
+			want    *model.ListResult[model.User]
 			wantErr bool
 		}{
 			"success": {
@@ -410,17 +410,17 @@ func Test_repo_GetList(t *testing.T) {
 					sort:     "+id",
 					query:    "",
 				},
-				want: &model.UserList{
+				want: &model.ListResult[model.User]{
 					Pagination: model.Pagination{
 						Page:         1,
 						PageSize:     10,
 						TotalRecords: 2,
 						TotalPages:   1,
 						Offset:       0,
-						Sort:         "+id",
+						Sort:         "id asc",
 						HasNext:      false,
 					},
-					Data: []*model.User{
+					Data: []model.User{
 						{
 							Email:          "admin@d.foundation",
 							FullName:       "admin",
@@ -450,17 +450,17 @@ func Test_repo_GetList(t *testing.T) {
 					sort:     "-id",
 					query:    "",
 				},
-				want: &model.UserList{
+				want: &model.ListResult[model.User]{
 					Pagination: model.Pagination{
 						Page:         1,
 						PageSize:     10,
 						TotalRecords: 2,
 						TotalPages:   1,
 						Offset:       0,
-						Sort:         "-id",
+						Sort:         "id desc",
 						HasNext:      false,
 					},
-					Data: []*model.User{
+					Data: []model.User{
 						{
 							Email:          "admin1@d.foundation",
 							FullName:       "admin1",
@@ -490,17 +490,17 @@ func Test_repo_GetList(t *testing.T) {
 					sort:     "-id",
 					query:    "admin",
 				},
-				want: &model.UserList{
+				want: &model.ListResult[model.User]{
 					Pagination: model.Pagination{
 						Page:         1,
 						PageSize:     10,
 						TotalRecords: 2,
 						TotalPages:   1,
 						Offset:       0,
-						Sort:         "-id",
+						Sort:         "id desc",
 						HasNext:      false,
 					},
-					Data: []*model.User{
+					Data: []model.User{
 						{
 							Email:          "admin1@d.foundation",
 							FullName:       "admin1",
@@ -530,17 +530,17 @@ func Test_repo_GetList(t *testing.T) {
 					sort:     "-id",
 					query:    "",
 				},
-				want: &model.UserList{
+				want: &model.ListResult[model.User]{
 					Pagination: model.Pagination{
 						Page:         2,
 						PageSize:     1,
 						TotalRecords: 2,
 						TotalPages:   2,
 						Offset:       1,
-						Sort:         "-id",
+						Sort:         "id desc",
 						HasNext:      false,
 					},
-					Data: []*model.User{
+					Data: []model.User{
 						{
 							Email:          "admin@d.foundation",
 							FullName:       "admin",
@@ -558,13 +558,18 @@ func Test_repo_GetList(t *testing.T) {
 		for name, tt := range tests {
 			t.Run(name, func(t *testing.T) {
 				r := &repo{}
-				got, err := r.GetList(ctx, tt.args.page, tt.args.pageSize, tt.args.sort, tt.args.query)
+				got, err := r.GetList(ctx, model.ListQuery{
+					Page:     tt.args.page,
+					Sort:     tt.args.sort,
+					Query:    tt.args.query,
+					PageSize: tt.args.pageSize,
+				})
 				if (err != nil) != tt.wantErr {
 					t.Errorf("repo.GetList() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
 				if !reflect.DeepEqual(got.Pagination, tt.want.Pagination) {
-					t.Errorf("repo.GetList() = %v, want %v", got.Pagination, tt.want.Pagination)
+					t.Errorf("%v case: repo.GetList() = %v, want %v", name, got.Pagination, tt.want.Pagination)
 				}
 
 				for i := 0; i < len(got.Data); i++ {

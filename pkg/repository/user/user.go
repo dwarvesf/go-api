@@ -2,9 +2,9 @@ package user
 
 import (
 	"github.com/dwarvesf/go-api/pkg/model"
+	"github.com/dwarvesf/go-api/pkg/repository/base"
 	"github.com/dwarvesf/go-api/pkg/repository/db"
 	"github.com/dwarvesf/go-api/pkg/repository/orm"
-	"github.com/dwarvesf/go-api/pkg/repository/util"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -12,44 +12,24 @@ import (
 type repo struct {
 }
 
-func (r *repo) GetList(ctx db.Context, page int, pageSize int, sort string, query string) (*model.UserList, error) {
-	qu := orm.Users()
-
-	var count int64
-	count, err := qu.Count(ctx.Context, ctx.DB)
-	if err != nil {
-		return nil, err
+func (r *repo) GetList(ctx db.Context, q model.ListQuery) (*model.ListResult[model.User], error) {
+	fnSet := base.GetListFuncSet[orm.User, model.User]{
+		PrepareQueryFn: func(ctx db.Context, q model.ListQuery) []qm.QueryMod {
+			queryParams := []qm.QueryMod{}
+			if q.Query != "" {
+				queryParams = append(queryParams, qm.Where("lower(name) LIKE lower(?)", "%"+q.Query+"%"))
+			}
+			return queryParams
+		},
+		CounableFn: func(q []qm.QueryMod) base.Counable {
+			return orm.Users(q...)
+		},
+		QueryListFn: func(q []qm.QueryMod) ([]*orm.User, error) {
+			return orm.Users(q...).All(ctx.Context, ctx.DB)
+		},
+		MappingFn: toUserModel,
 	}
-
-	pagination, err := util.CalculatePagination(int(count), page, pageSize)
-	if err != nil {
-		return nil, err
-	}
-
-	pagination.Sort = sort
-	pagination.HasNext = pagination.Page < pagination.TotalPages
-
-	qms := []qm.QueryMod{}
-	qms = append(qms, qm.Limit(pagination.PageSize), qm.Offset(pagination.Offset), qm.OrderBy(util.ParseSort(sort)))
-
-	if query != "" {
-		qms = append(qms, qm.Where("lower(name) LIKE lower(?)", "%"+query+"%"))
-	}
-
-	events, err := orm.Users(qms...).All(ctx.Context, ctx.DB)
-	if err != nil {
-		return nil, err
-	}
-
-	var result []*model.User
-	for _, event := range events {
-		result = append(result, toUserModel(event))
-	}
-
-	return &model.UserList{
-		Data:       result,
-		Pagination: *pagination,
-	}, nil
+	return base.GetList(ctx, q, fnSet)
 }
 
 func (r *repo) Count(ctx db.Context) (int64, error) {
