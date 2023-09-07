@@ -7,14 +7,14 @@ on:
 # Environment variables available to all jobs and steps in this workflow
 env:
   GITHUB_SHA: ${{ github.sha }}
-  GITHUB_ORG: my-org
+  K8S_ENVIRONMENT: prod
+  GITHUB_ORG: dwarvesf
   GIT_USER: lmquang
   GIT_EMAIL: quanglm.ops@gmail.com
   REGISTRY_HOSTNAME: gcr.io
-  GKE_PROJECT: gcp-project-id
-  APP: my-app
-  IMAGE: my-app/go-api
-  K8S_ENVIRONMENT: prod
+  GKE_PROJECT: <gcp-project-id>
+  APP: go-api
+  IMAGE: go-api-image
   
 
 jobs:
@@ -41,8 +41,8 @@ jobs:
       # Build & Push the Docker image
       - name: Build & Push
         run: |
-          docker build -t $REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_REF_NAME} .   
-          docker push $REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_REF_NAME}
+          docker build -t $REGISTRY_HOSTNAME/$GKE_PROJECT/$APP/$IMAGE:${GITHUB_REF_NAME} .   
+          docker push $REGISTRY_HOSTNAME/$GKE_PROJECT/$APP/$IMAGE:${GITHUB_REF_NAME}
 
       # Setup kustomize
       - name: Setup kustomize
@@ -54,7 +54,7 @@ jobs:
       - name: Generate kustomize resources
         run: |
           cd ./k8s/$K8S_ENVIRONMENT
-          /tmp/kustomize edit set image $REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE=$REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_SHA}
+          /tmp/kustomize edit set image $REGISTRY_HOSTNAME/$GKE_PROJECT/$APP/$IMAGE=$REGISTRY_HOSTNAME/$GKE_PROJECT/$APP/$IMAGE:${GITHUB_SHA}
           /tmp/kustomize build > /tmp/resources.yaml
 
       # Checkout infrastructure repo, update app resources, and push to main
