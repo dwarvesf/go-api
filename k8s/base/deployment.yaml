@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+  template:
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: api
+          imagePullPolicy: Always
+          image: go-api-image
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            limits:
+              cpu: 100m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          envFrom:
+            - secretRef:
+                name: go-api
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /healthz
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 10
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /healthz
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 10

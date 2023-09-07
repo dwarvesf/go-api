@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: api-sql-migrate
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: sql-migrate
+          image: go-api-image
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Migrating $ENV database..."
+              sql-migrate up -env=$ENV
+          resources:
+            limits:
+              cpu: 50m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 128Mi
+          envFrom:
+            - secretRef:
+                name: go-api
