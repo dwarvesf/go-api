@@ -12,7 +12,7 @@ spec:
       containers:
         - name: api
           imagePullPolicy: Always
-          image: go-api-image
+          image: go-api
           ports:
             - containerPort: 8080
               name: http

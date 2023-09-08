@@ -20,6 +20,6 @@ namespace: go-api-dev
 patches:
 - path: deployment.yaml
 images:
-- name: go-api-image
-  newName: go-api-image
-  newTag: v1.0.1
+- name: go-api
+  newName: go-api
+  newTag: v0.0.1

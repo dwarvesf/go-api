@@ -37,8 +37,8 @@ Briefly describe your project, its purpose, and its main features.
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/your-project.git
-   cd your-project
+   git clone git@github.com:dwarvesf/go-api.git new-project
+   cd new-project
    ```
 
 2. Install project dependencies:
