@@ -5,15 +5,14 @@ import (
 	"github.com/dwarvesf/go-api/pkg/handler"
 	"github.com/dwarvesf/go-api/pkg/handler/v1/portal"
 	"github.com/dwarvesf/go-api/pkg/middleware"
-	"github.com/getsentry/sentry-go"
-	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"     // swagger embed files
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
-func setupRouter(a App, sClient *sentry.Client) *gin.Engine {
+func setupRouter(a App) *gin.Engine {
 	docs.SwaggerInfo.Title = "Swagger API"
 	docs.SwaggerInfo.Description = "This is a swagger for API."
 	docs.SwaggerInfo.Version = "1.0"
@@ -42,10 +41,11 @@ func setupRouter(a App, sClient *sentry.Client) *gin.Engine {
 
 	if a.cfg.SentryDSN != "" {
 		// Once it's done, you can attach the handler as one of your middleware
-		r.Use(sentrygin.New(sentrygin.Options{
-			Repanic: true,
-		}))
+		r.Use(otelgin.Middleware("api-service"))
 	}
+
+	// recover when panic middleware
+	r.Use(a.monitor.PanicAlarmMiddleware())
 
 	// handlers
 	publicHandler(r, a)
@@ -55,8 +55,8 @@ func setupRouter(a App, sClient *sentry.Client) *gin.Engine {
 }
 
 func publicHandler(r *gin.Engine, a App) {
-	h := handler.New(*a.cfg)
-	portalHandler := portal.New(*a.cfg, a.l, a.repo, a.service)
+	h := handler.New(*a.cfg, a.monitor)
+	portalHandler := portal.New(*a.cfg, a.l, a.repo, a.service, a.monitor)
 
 	r.GET("/healthz", h.Healthz)
 
@@ -80,7 +80,7 @@ func authenticatedHandler(r *gin.Engine, a App) {
 	apiV1.Use(authMw.WithAuth)
 	portalGroup := apiV1.Group("/portal")
 	{
-		portalHandler := portal.New(*a.cfg, a.l, a.repo, a.service)
+		portalHandler := portal.New(*a.cfg, a.l, a.repo, a.service, a.monitor)
 		portalGroup.GET("/me", portalHandler.Me)
 		portalGroup.PUT("/users", portalHandler.UpdateUser)
 		portalGroup.PUT("/users/password", portalHandler.UpdatePassword)

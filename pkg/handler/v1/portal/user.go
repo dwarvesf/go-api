@@ -22,6 +22,13 @@ import (
 // @Failure 500 {object} ErrorResponse
 // @Router /portal/me [get]
 func (h Handler) Me(c *gin.Context) {
+	const spanName = "meHandler"
+	newCtx, span := h.monitor.NewSpan(c.Request.Context(), spanName)
+	defer span.End()
+
+	// Update c ctx to newCtx
+	c.Request = c.Request.WithContext(newCtx)
+
 	rs, err := h.userCtrl.Me(c.Request.Context())
 	if err != nil {
 		util.HandleError(c, err)
@@ -50,6 +57,13 @@ func (h Handler) Me(c *gin.Context) {
 // @Failure 500 {object} ErrorResponse
 // @Router /portal/users [put]
 func (h Handler) UpdateUser(c *gin.Context) {
+	const spanName = "updateUserHandler"
+	newCtx, span := h.monitor.NewSpan(c.Request.Context(), spanName)
+	defer span.End()
+
+	// Update c ctx to newCtx
+	c.Request = c.Request.WithContext(newCtx)
+
 	var req view.UpdateUserRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
@@ -92,6 +106,13 @@ func (h Handler) UpdateUser(c *gin.Context) {
 // @Failure 500 {object} ErrorResponse
 // @Router /portal/users/password [put]
 func (h Handler) UpdatePassword(c *gin.Context) {
+	const spanName = "updatePasswordHandler"
+	newCtx, span := h.monitor.NewSpan(c.Request.Context(), spanName)
+	defer span.End()
+
+	// Update c ctx to newCtx
+	c.Request = c.Request.WithContext(newCtx)
+
 	var req view.UpdatePasswordRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {

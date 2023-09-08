@@ -9,6 +9,10 @@ import (
 )
 
 func (c impl) UpdatePassword(ctx context.Context, user model.UpdatePasswordRequest) error {
+	const spanName = "UpdatePasswordController"
+	ctx, span := c.monitor.NewSpan(ctx, spanName)
+	defer span.End()
+
 	uID, err := middleware.UserIDFromContext(ctx)
 	if err != nil {
 		return model.ErrInvalidToken

@@ -22,6 +22,13 @@ import (
 // @Failure 500 {object} ErrorResponse
 // @Router /portal/auth/login [post]
 func (h Handler) Login(c *gin.Context) {
+	const spanName = "loginHandler"
+	newCtx, span := h.monitor.NewSpan(c.Request.Context(), spanName)
+	defer span.End()
+
+	// Update c ctx to newCtx
+	c.Request = c.Request.WithContext(newCtx)
+
 	var req view.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		util.HandleError(c, view.ErrBadRequest(err))
@@ -60,6 +67,13 @@ func (h Handler) Login(c *gin.Context) {
 // @Failure 500 {object} ErrorResponse
 // @Router /portal/auth/signup [post]
 func (h Handler) Signup(c *gin.Context) {
+	const spanName = "signupHandler"
+	newCtx, span := h.monitor.NewSpan(c.Request.Context(), spanName)
+	defer span.End()
+
+	// Update c ctx to newCtx
+	c.Request = c.Request.WithContext(newCtx)
+
 	var req view.SignupRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		util.HandleError(c, view.ErrBadRequest(err))

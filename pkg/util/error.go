@@ -7,6 +7,7 @@ import (
 	"github.com/dwarvesf/go-api/pkg/handler/v1/view"
 	"github.com/dwarvesf/go-api/pkg/model"
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // HandleError handle the rest error
@@ -16,6 +17,7 @@ func HandleError(c *gin.Context, err error) {
 		"status":  e.Status,
 		"code":    e.Code,
 		"message": e.Err,
+		"traceID": trace.SpanFromContext(c.Request.Context()).SpanContext().TraceID().String(),
 	})
 }
 

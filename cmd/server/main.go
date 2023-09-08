@@ -11,6 +11,7 @@ import (
 
 	"github.com/dwarvesf/go-api/pkg/config"
 	"github.com/dwarvesf/go-api/pkg/logger"
+	"github.com/dwarvesf/go-api/pkg/logger/monitor"
 	"github.com/dwarvesf/go-api/pkg/repository"
 	"github.com/dwarvesf/go-api/pkg/repository/db"
 	"github.com/dwarvesf/go-api/pkg/service"
@@ -35,15 +36,15 @@ import (
 // @name Authorization
 func main() {
 	cfg := config.LoadConfig(config.DefaultConfigLoaders())
-	sClient, err := logger.NewSentry(cfg)
+	sentryMonitor, err := monitor.NewSentry(cfg)
 	if err != nil {
 		log.Fatal(err, "failed to init sentry")
 	}
-	if sClient != nil {
-		defer sClient.Flush(2 * time.Second)
+	if sentryMonitor.Client != nil {
+		defer sentryMonitor.Client.Flush(2 * time.Second)
 	}
 
-	l := logger.NewLogByConfig(cfg, sClient)
+	l := logger.NewLogByConfig(cfg, sentryMonitor.Client)
 	l.Infof("Server starting")
 
 	a := App{
@@ -51,6 +52,7 @@ func main() {
 		cfg:     cfg,
 		service: service.New(cfg),
 		repo:    repository.NewRepo(),
+		monitor: sentryMonitor,
 	}
 
 	_, err = db.Init(*cfg)
@@ -61,7 +63,7 @@ func main() {
 	// Server
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", cfg.Port),
-		Handler: setupRouter(a, sClient),
+		Handler: setupRouter(a),
 	}
 
 	quit := make(chan os.Signal)
@@ -98,4 +100,5 @@ type App struct {
 	cfg     *config.Config
 	service service.Service
 	repo    *repository.Repo
+	monitor monitor.Exporter
 }
