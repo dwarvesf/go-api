@@ -22,7 +22,7 @@ resources:
 - ../base/jobs/sql-migrate.yaml
 namePrefix: go-api- # <--- this prefix is app_name
 images:
-- name: go-api-image # <--- this format should be {app_name}-image
+- name: go-api # <--- this format should be {app_name}
 commonLabels:
   app: api
 commonAnnotations:

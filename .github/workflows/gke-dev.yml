@@ -15,7 +15,7 @@ env:
   REGISTRY_HOSTNAME: gcr.io
   GKE_PROJECT: <gcp-project-id>
   APP: go-api
-  IMAGE: go-api-image
+  IMAGE: go-api
 
 jobs:
   setup-build-publish-deploy:
