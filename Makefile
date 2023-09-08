@@ -71,3 +71,39 @@ help:
 	@echo "  pg-migrate-down    Rollback the last migration"
 	@echo "  gen-models    Generate models using sqlboiler"
 	@echo "  test               Start the testing database container, run tests, and stop the container"
+
+# Release flow
+RELEASE_BRANCH=main
+BETA_BRANCH=staging
+DEVELOP_BRANCH=develop
+
+# install once for all
+.PHOHY: install-semantic-release-cli
+install-semantic-release-cli:
+	npm install --save-dev semantic-release
+	npm install @semantic-release/git @semantic-release/changelog @semantic-release/github -D
+
+# to release prod
+# Notes: you must release staging first, this will help to bump version correctly
+.PHONY: release
+release: 
+	git checkout $(BETA_BRANCH) && git pull origin $(BETA_BRANCH) && \
+		git checkout $(RELEASE_BRANCH) && git pull origin $(RELEASE_BRANCH) && \
+		git merge $(BETA_BRANCH) --no-edit --no-ff && \
+		git push origin $(RELEASE_BRANCH) && \
+		git checkout $(DEVELOP_BRANCH)
+
+# to release staging
+.PHONY: release-staging
+release-staging: sync-release
+	git checkout $(DEVELOP_BRANCH) && git pull origin $(DEVELOP_BRANCH) && \
+		git checkout $(BETA_BRANCH) && git pull origin $(BETA_BRANCH) && \
+		git merge $(DEVELOP_BRANCH) --no-edit --no-ff && \
+		git push origin $(BETA_BRANCH) && \
+		git checkout $(DEVELOP_BRANCH) && git push origin $(DEVELOP_BRANCH)
+
+.PHONY: sync-release
+sync-release:
+	git checkout $(RELEASE_BRANCH) && git pull origin $(RELEASE_BRANCH) && \
+		git checkout $(BETA_BRANCH) && git pull origin $(BETA_BRANCH) && \
+		git merge $(RELEASE_BRANCH) --no-edit --no-ff

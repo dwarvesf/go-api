@@ -1,0 +1,76 @@
+name: Build and Deploy to GKE Prod
+
+on:
+  release:
+    types: [released]
+
+# Environment variables available to all jobs and steps in this workflow
+env:
+  GITHUB_SHA: ${{ github.sha }}
+  K8S_ENVIRONMENT: prod
+  GITHUB_ORG: dwarvesf
+  GIT_USER: lmquang
+  GIT_EMAIL: quanglm.ops@gmail.com
+  REGISTRY_HOSTNAME: gcr.io
+  GKE_PROJECT: <gcp-project-id>
+  APP: go-api
+  IMAGE: go-api-image
+  
+
+jobs:
+  setup-build-publish-deploy:
+    name: Setup, Build, Publish, and Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Setup gcloud CLI
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v0"
+
+      # Setup Docker
+      - name: Setup Docker
+        run: |
+          gcloud auth configure-docker gcr.io
+      # Build & Push the Docker image
+      - name: Build & Push
+        run: |
+          docker build -t $REGISTRY_HOSTNAME/$GKE_PROJECT/$APP/$IMAGE:${GITHUB_REF_NAME} .   
+          docker push $REGISTRY_HOSTNAME/$GKE_PROJECT/$APP/$IMAGE:${GITHUB_REF_NAME}
+
+      # Setup kustomize
+      - name: Setup kustomize
+        run: |
+          curl -o kustomize --location https://github.com/kubernetes-sigs/kustomize/releases/download/v5.0.1/kustomize_5.0.1_linux_amd64
+          chmod u+x ./kustomize
+          mv kustomize /tmp
+      # Generate kustomize resources
+      - name: Generate kustomize resources
+        run: |
+          cd ./k8s/$K8S_ENVIRONMENT
+          /tmp/kustomize edit set image $REGISTRY_HOSTNAME/$GKE_PROJECT/$APP/$IMAGE=$REGISTRY_HOSTNAME/$GKE_PROJECT/$APP/$IMAGE:${GITHUB_SHA}
+          /tmp/kustomize build > /tmp/resources.yaml
+
+      # Checkout infrastructure repo, update app resources, and push to main
+      - name: Checkout $GITHUB_ORG/infrastructure
+        uses: actions/checkout@master
+        with:
+          repository: $GITHUB_ORG/infrastructure
+          token: ${{ secrets.GH_PAT }}
+          path: ./infrastructure
+          ref: main
+      - name: Update app resources
+        working-directory: ./temp
+        run: |
+          cd ./infrastructure/$APP/$K8S_ENVIRONMENT
+          git config user.name $GIT_USER
+          git config user.email $GIT_EMAIL
+          mv /tmp/resources.yaml .
+          git commit -am "[skip ci] ${APP} ${K8S_ENVIRONMENT} image update"
+          git push origin main

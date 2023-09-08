@@ -1,0 +1,44 @@
+on: [pull_request]
+
+jobs:
+  ci-test:
+    runs-on: ubuntu-latest
+    
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres:15
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: go-api-db-test
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5433:5432   
+
+    name: CI testing
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Golang with cache
+        uses: magnetikonline/action-golang-cache@v4
+        with:
+          go-version-file: go.mod
+      - name: Install
+        run: go install github.com/rubenv/sql-migrate/sql-migrate@latest
+
+      - name: Prepare database
+        run: 	|
+          sql-migrate down -env="test" -limit=0
+          sql-migrate up -env="test"
+
+      - name: Run Test cases
+        env:
+          ENV: test
+        run: 	go test -v ./... --cover

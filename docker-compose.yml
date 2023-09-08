@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:latest
+    image: postgres:15
     container_name: go-api-db
     environment:
       POSTGRES_DB: go-api-db
@@ -16,7 +16,7 @@ services:
       - go-api-data:/var/lib/postgresql/data
 
   db-test:
-    image: postgres:latest
+    image: postgres:15
     container_name: go-api-db-test
     environment:
       POSTGRES_DB: go-api-db-test

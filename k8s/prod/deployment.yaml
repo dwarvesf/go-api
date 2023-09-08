@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  replicas: 2
+  template:
+    spec:
+      nodeSelector:
+        nodepool: production
+      tolerations:
+      - key: nodepool
+        operator: Equal
+        value: production
+      containers:
+        - name: api
+          resources:
+            limits:
+              cpu: 100m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
