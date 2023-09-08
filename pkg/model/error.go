@@ -3,6 +3,12 @@ package model
 import "net/http"
 
 var (
+	// ErrNoAuthHeader is the error for no authorization header
+	ErrNoAuthHeader = Error{
+		Status:  http.StatusUnauthorized,
+		Code:    "Unauthorized",
+		Message: "No authorization header",
+	}
 	// ErrInvalidToken is the error for invalid token
 	ErrInvalidToken = Error{
 		Status:  http.StatusUnauthorized,

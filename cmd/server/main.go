@@ -12,6 +12,7 @@ import (
 	"github.com/dwarvesf/go-api/pkg/config"
 	"github.com/dwarvesf/go-api/pkg/logger"
 	"github.com/dwarvesf/go-api/pkg/logger/monitor"
+	"github.com/dwarvesf/go-api/pkg/middleware"
 	"github.com/dwarvesf/go-api/pkg/realtime"
 	"github.com/dwarvesf/go-api/pkg/repository"
 	"github.com/dwarvesf/go-api/pkg/repository/db"
@@ -46,13 +47,14 @@ func main() {
 	l := logger.NewLogByConfig(cfg)
 	l.Infof("Server starting")
 
+	authMw := middleware.NewAuthMiddleware(cfg.SecretKey)
 	a := App{
 		l:              l,
 		cfg:            cfg,
 		service:        service.New(cfg),
 		repo:           repository.NewRepo(),
 		monitor:        sMonitor,
-		realtimeServer: realtime.New(),
+		realtimeServer: realtime.New(authMw),
 	}
 
 	_, err = db.Init(*cfg)
