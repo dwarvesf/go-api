@@ -27,7 +27,7 @@ func FromContext(ctx context.Context) Context {
 func NewTransaction(ctx context.Context) (Context, FinalFunc) {
 	tx, err := GetDB().BeginTx(ctx, nil)
 	if err != nil {
-		return Context{}, func(error) error { return err }
+		panic(err)
 	}
 
 	return Context{

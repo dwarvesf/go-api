@@ -83,7 +83,7 @@ func publicHandler(r *gin.Engine, a App) {
 		}
 
 		a.l.Infof("user %s connected", u.ID)
-		a.realtimeServer.HandleEvent(c, *u, func(data any) error {
+		a.realtimeServer.HandleEvent(c, *u, func(ginCtx *gin.Context, data any) error {
 			a.l.Infof("data received: %v", data)
 			return nil
 		})

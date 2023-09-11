@@ -30,17 +30,17 @@ type SSEConn struct {
 }
 
 type sse struct {
-	clients map[string][]*SSEConn
-	mutex   sync.Mutex
-	authMw  middleware.AuthMiddleware
+	clients sync.Map
+	// mutex   sync.RWMutex
+	authMw middleware.AuthMiddleware
 }
 
 // NewSSE creates a new SSE server.
 func NewSSE(authMw middleware.AuthMiddleware) Server {
 	return &sse{
-		clients: make(map[string][]*SSEConn),
-		mutex:   sync.Mutex{},
-		authMw:  authMw,
+		clients: sync.Map{},
+		// mutex:   sync.RWMutex{},
+		authMw: authMw,
 	}
 }
 
@@ -55,7 +55,7 @@ func (s *sse) HandleConnection(c *gin.Context) (*User, error) {
 			return nil, err
 		}
 		if errors.Is(err, model.ErrNoAuthHeader) {
-			userID = "guest-" + generateRandomID()
+			userID = PrefixGuest + generateRandomID()
 			device = &SSEConn{
 				Channel: messageChannel,
 				ID:      userID,
@@ -66,7 +66,7 @@ func (s *sse) HandleConnection(c *gin.Context) (*User, error) {
 		if err != nil {
 			return nil, err
 		}
-		userID = "user-" + strconv.Itoa(uID)
+		userID = PrefixUser + strconv.Itoa(uID)
 		device = &SSEConn{
 			Channel: messageChannel,
 			ID:      userID + "-" + generateRandomID(),
@@ -74,13 +74,16 @@ func (s *sse) HandleConnection(c *gin.Context) (*User, error) {
 	}
 
 	// Register the client's channel for SSE updates
-	s.mutex.Lock()
-	clientArr, ok := s.clients[userID]
+	clientArr, ok := s.clients.Load(userID)
 	if !ok {
 		clientArr = make([]*SSEConn, 0)
 	}
-	s.clients[userID] = append(clientArr, device)
-	s.mutex.Unlock()
+	clientArrData, ok := clientArr.([]*SSEConn)
+	if !ok {
+		clientArrData = make([]*SSEConn, 0)
+	}
+	clientArrData = append(clientArrData, device)
+	s.clients.Store(userID, clientArrData)
 
 	user := &User{
 		ID:       userID,
@@ -90,11 +93,12 @@ func (s *sse) HandleConnection(c *gin.Context) (*User, error) {
 	return user, nil
 }
 
-func (s *sse) HandleEvent(c *gin.Context, u User, fn func(any) error) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-
-	clientChArr, ok := s.clients[u.ID]
+func (s *sse) HandleEvent(c *gin.Context, u User, callback func(*gin.Context, any) error) {
+	val, ok := s.clients.Load(u.ID)
+	if !ok {
+		return
+	}
+	clientChArr, ok := val.([]*SSEConn)
 	if !ok {
 		return
 	}
@@ -106,7 +110,10 @@ func (s *sse) HandleEvent(c *gin.Context, u User, fn func(any) error) {
 		}
 	}
 
+	finished := make(chan bool)
+
 	go func() {
+		close(finished)
 		disconnected := c.Stream(func(w io.Writer) bool {
 			// Stream message to client from message channel
 			if msg, ok := <-clientCh.Channel; ok {
@@ -120,14 +127,16 @@ func (s *sse) HandleEvent(c *gin.Context, u User, fn func(any) error) {
 			s.DisconnectUser(u)
 		}
 	}()
+	<-finished
 }
 func (s *sse) SendMessage(userID string, message string) error {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-
-	clientChArr, ok := s.clients[userID]
+	val, ok := s.clients.Load(userID)
 	if !ok {
-		return errors.New("client not found")
+		return ErrClientNotFound
+	}
+	clientChArr, ok := val.([]*SSEConn)
+	if !ok {
+		return ErrClientNotFound
 	}
 
 	for _, clientCh := range clientChArr {
@@ -138,17 +147,18 @@ func (s *sse) SendMessage(userID string, message string) error {
 }
 
 func (s *sse) SendData(userID string, data any) error {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-
 	body, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
 
-	clientChArr, ok := s.clients[userID]
+	val, ok := s.clients.Load(userID)
 	if !ok {
-		return errors.New("client not found")
+		return ErrClientNotFound
+	}
+	clientChArr, ok := val.([]*SSEConn)
+	if !ok {
+		return ErrClientNotFound
 	}
 
 	for _, clientCh := range clientChArr {
@@ -159,50 +169,62 @@ func (s *sse) SendData(userID string, data any) error {
 }
 
 func (s *sse) BroadcastMessage(message string) error {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-
-	for _, chArr := range s.clients {
-		for _, clientCh := range chArr {
+	s.clients.Range(func(key, value any) bool {
+		clientChArr, ok := value.([]*SSEConn)
+		if !ok {
+			return true
+		}
+		for _, clientCh := range clientChArr {
 			clientCh.Channel <- message
 		}
-	}
+		return true
+	})
 
 	return nil
 }
 
 func (s *sse) BroadcastData(data any) error {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-
 	body, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
 
-	for _, chArr := range s.clients {
-		for _, clientCh := range chArr {
+	s.clients.Range(func(key, value any) bool {
+		clientChArr, ok := value.([]*SSEConn)
+		if !ok {
+			return true
+		}
+		for _, clientCh := range clientChArr {
 			clientCh.Channel <- string(body)
 		}
-	}
+		return true
+	})
 
 	return nil
 }
 
 func (s *sse) DisconnectUser(u User) error {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-
-	clientChArr, ok := s.clients[u.ID]
+	val, ok := s.clients.Load(u.ID)
 	if !ok {
-		return errors.New("client not found")
+		return nil
+	}
+	clientChArr, ok := val.([]*SSEConn)
+	if !ok {
+		return nil
 	}
 
-	for _, clientCh := range clientChArr {
+	deleteIdx := -1
+	for idx, clientCh := range clientChArr {
+		if clientCh.ID != u.DeviceID {
+			continue
+		}
 		close(clientCh.Channel)
+		deleteIdx = idx
+	}
+	if deleteIdx != -1 {
+		clientChArr = append(clientChArr[:deleteIdx], clientChArr[deleteIdx+1:]...)
 	}
 
-	delete(s.clients, u.ID)
-
+	s.clients.Store(u.ID, clientChArr)
 	return nil
 }

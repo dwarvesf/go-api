@@ -1,16 +1,24 @@
 package realtime
 
 import (
-	"fmt"
 	"strconv"
 	"sync"
 
+	"github.com/dwarvesf/go-api/pkg/logger"
 	"github.com/dwarvesf/go-api/pkg/middleware"
 	"github.com/dwarvesf/go-api/pkg/model"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 )
+
+// Socket represents a WebSocket connection
+type Socket interface {
+	ReadMessage() (messageType int, p []byte, err error)
+	WriteMessage(messageType int, data []byte) error
+	WriteJSON(v interface{}) error
+	Close() error
+}
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -19,20 +27,21 @@ var upgrader = websocket.Upgrader{
 
 // Conn represents a WebSocket connection
 type Conn struct {
-	*websocket.Conn
+	Socket
 	DeviceID    string
 	IsGuest     bool
 	Permissions []string
 }
 
-type impl struct {
-	Clients map[string][]*Conn
-	Mutex   sync.RWMutex
+type ws struct {
+	clients map[string][]*Conn
+	mutex   sync.RWMutex
 	authMw  middleware.AuthMiddleware
+	log     logger.Log
 }
 
 // HandleConnection handles WebSocket connections and user authentication.
-func (s *impl) HandleConnection(c *gin.Context) (*User, error) {
+func (s *ws) HandleConnection(c *gin.Context) (*User, error) {
 	r := c.Request
 	w := c.Writer
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -49,11 +58,11 @@ func (s *impl) HandleConnection(c *gin.Context) (*User, error) {
 		}
 
 		if errors.Is(err, model.ErrNoAuthHeader) {
-			userID = "guest-" + generateRandomID()
+			userID = PrefixGuest + generateRandomID()
 			device = &Conn{
 				DeviceID: userID,
 				IsGuest:  true,
-				Conn:     conn,
+				Socket:   conn,
 			}
 		}
 	} else {
@@ -61,21 +70,21 @@ func (s *impl) HandleConnection(c *gin.Context) (*User, error) {
 		if err != nil {
 			return nil, err
 		}
-		userID = "user-" + strconv.Itoa(uID)
+		userID = PrefixUser + strconv.Itoa(uID)
 		device = &Conn{
 			DeviceID: userID + "-" + generateRandomID(),
-			Conn:     conn,
+			Socket:   conn,
 		}
 	}
 
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 
 	// Add the user to the server's list of clients
-	if _, found := s.Clients[userID]; !found {
-		s.Clients[userID] = make([]*Conn, 0)
+	if _, found := s.clients[userID]; !found {
+		s.clients[userID] = make([]*Conn, 0)
 	}
-	s.Clients[userID] = append(s.Clients[userID], device)
+	s.clients[userID] = append(s.clients[userID], device)
 
 	return &User{
 		ID:       userID,
@@ -83,12 +92,12 @@ func (s *impl) HandleConnection(c *gin.Context) (*User, error) {
 	}, nil
 }
 
-func (s *impl) HandleEvent(c *gin.Context, u User, callback func(data any) error) {
+func (s *ws) HandleEvent(c *gin.Context, u User, callback func(*gin.Context, any) error) {
 	var conn *Conn
-	s.Mutex.RLock()
-	devices, ok := s.Clients[u.ID]
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+	devices, ok := s.clients[u.ID]
 	if !ok {
-		s.Mutex.RUnlock()
 		return
 	}
 	for _, device := range devices {
@@ -97,37 +106,36 @@ func (s *impl) HandleEvent(c *gin.Context, u User, callback func(data any) error
 			break
 		}
 	}
-	s.Mutex.RUnlock()
 
 	defer s.DisconnectUser(u)
 
 	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
-			fmt.Println(err)
+			s.log.Error(err)
 			return
 		}
 
-		err = callback(message)
+		err = callback(c, message)
 		if err != nil {
-			fmt.Println(err)
+			s.log.Error(err)
 			return
 		}
 	}
 }
 
 // SendMessage sends a message to all devices of a WebSocket user.
-func (s *impl) SendMessage(userID string, message string) error {
-	s.Mutex.RLock()
-	defer s.Mutex.RUnlock()
+func (s *ws) SendMessage(userID string, message string) error {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
 
-	devices, found := s.Clients[userID]
+	devices, found := s.clients[userID]
 	if !found {
-		return fmt.Errorf("user not found")
+		return ErrUserNotFound
 	}
 
 	for _, device := range devices {
-		err := device.Conn.WriteMessage(websocket.TextMessage, []byte(message))
+		err := device.Socket.WriteMessage(websocket.TextMessage, []byte(message))
 		if err != nil {
 			return err
 		}
@@ -137,17 +145,17 @@ func (s *impl) SendMessage(userID string, message string) error {
 }
 
 // SendData sends data to all devices of a WebSocket user.
-func (s *impl) SendData(userID string, data any) error {
-	s.Mutex.RLock()
-	defer s.Mutex.RUnlock()
+func (s *ws) SendData(userID string, data any) error {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
 
-	devices, found := s.Clients[userID]
+	devices, found := s.clients[userID]
 	if !found {
-		return fmt.Errorf("user not found")
+		return ErrUserNotFound
 	}
 
 	for _, device := range devices {
-		err := device.Conn.WriteJSON(data)
+		err := device.Socket.WriteJSON(data)
 		if err != nil {
 			return err
 		}
@@ -157,15 +165,15 @@ func (s *impl) SendData(userID string, data any) error {
 }
 
 // BroadcastMessage sends a message to all devices of all WebSocket users.
-func (s *impl) BroadcastMessage(message string) error {
-	s.Mutex.RLock()
-	defer s.Mutex.RUnlock()
+func (s *ws) BroadcastMessage(message string) error {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
 
-	for _, devices := range s.Clients {
+	for _, devices := range s.clients {
 		for _, device := range devices {
-			err := device.Conn.WriteMessage(websocket.TextMessage, []byte(message))
+			err := device.Socket.WriteMessage(websocket.TextMessage, []byte(message))
 			if err != nil {
-				fmt.Println(err)
+				return err
 			}
 		}
 	}
@@ -174,15 +182,15 @@ func (s *impl) BroadcastMessage(message string) error {
 }
 
 // BroadcastData sends data to all devices of all WebSocket users.
-func (s *impl) BroadcastData(data any) error {
-	s.Mutex.RLock()
-	defer s.Mutex.RUnlock()
+func (s *ws) BroadcastData(data any) error {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
 
-	for _, devices := range s.Clients {
+	for _, devices := range s.clients {
 		for _, device := range devices {
-			err := device.Conn.WriteJSON(data)
+			err := device.Socket.WriteJSON(data)
 			if err != nil {
-				fmt.Println(err)
+				return err
 			}
 		}
 	}
@@ -190,13 +198,13 @@ func (s *impl) BroadcastData(data any) error {
 	return nil
 }
 
-func (s *impl) DisconnectUser(u User) error {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
+func (s *ws) DisconnectUser(u User) error {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 
-	devices, found := s.Clients[u.ID]
+	devices, found := s.clients[u.ID]
 	if !found {
-		return fmt.Errorf("user not found")
+		return ErrUserNotFound
 	}
 
 	for i, device := range devices {
@@ -207,5 +215,5 @@ func (s *impl) DisconnectUser(u User) error {
 		}
 	}
 
-	return fmt.Errorf("device not found")
+	return ErrDeviceNotFound
 }

@@ -54,7 +54,7 @@ func main() {
 		service:        service.New(cfg),
 		repo:           repository.NewRepo(),
 		monitor:        sMonitor,
-		realtimeServer: realtime.New(authMw),
+		realtimeServer: realtime.New(authMw, l),
 	}
 
 	_, err = db.Init(*cfg)

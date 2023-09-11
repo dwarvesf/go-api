@@ -50,7 +50,8 @@ pg-migrate-down:
 test: pg-start-test
 	sql-migrate down -env="test" -limit=0
 	sql-migrate up -env="test"
-	ENV=test go test -v ./... --cover
+	ENV=test go test -v -timeout 30s ./... --cover
+	# ENV=test go test -timeout 30s -run ^TestHandleConnection$ ./... --cover
 
 gen-models: pg-migrate-up
 	sqlboiler psql

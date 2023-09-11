@@ -4,6 +4,14 @@ import (
 	"net/http/httptest"
 	"sync"
 	"testing"
+	"time"
+
+	"github.com/dwarvesf/go-api/pkg/handler/testutil"
+	"github.com/dwarvesf/go-api/pkg/middleware"
+	"github.com/dwarvesf/go-api/pkg/service/jwthelper"
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/stretchr/testify/require"
 )
 
 type TestResponseRecorder struct {
@@ -19,70 +27,95 @@ func (r *TestResponseRecorder) closeClient() {
 	r.closeChannel <- true
 }
 
-// func TestHandleConnection(t *testing.T) {
-// 	tests := map[string]struct {
-// 		clientID string
-// 		message  string
-// 		wantErr  bool
-// 	}{
-// 		"success": {
-// 			clientID: "client1",
-// 			message:  "event:message\ndata:test message\n\n",
-// 			wantErr:  false,
-// 		},
-// 		"failure": {
-// 			clientID: "client2",
-// 			wantErr:  true,
-// 		},
-// 	}
+func TestHandleConnection(t *testing.T) {
+	secret := "secret"
+	jwtH := jwthelper.NewHelper(secret)
+	now := time.Now()
+	token, _ := jwtH.GenerateJWTToken(map[string]interface{}{
+		"sub":  1,
+		"iss":  "app",
+		"role": "user",
+		"exp":  jwt.NewNumericDate(now.AddDate(1, 0, 0)),
+		"nbf":  jwt.NewNumericDate(now),
+		"iat":  jwt.NewNumericDate(now),
+	})
+	authMw := middleware.NewAuthMiddleware(secret)
 
-// 	for name, tc := range tests {
-// 		t.Run(name, func(t *testing.T) {
-// 			closeChannel := make(chan bool)
-// 			w := &TestResponseRecorder{
-// 				httptest.NewRecorder(),
-// 				closeChannel,
-// 			}
-// 			ginCtx := testutil.NewRequest(w, testutil.MethodGet, nil, nil, nil, nil)
+	tests := map[string]struct {
+		clientID    string
+		bearerToken string
+		message     string
+		wantErr     bool
+	}{
+		"success": {
+			clientID: "client1",
+			message:  "event:message\ndata:test message\n\n",
+			wantErr:  false,
+		},
+		"valid token": {
+			clientID:    "client1",
+			message:     "event:message\ndata:test message\n\n",
+			bearerToken: "Bearer " + token,
+			wantErr:     false,
+		},
+		"failure": {
+			clientID:    "client1",
+			bearerToken: "Bearer invalidToken",
+			wantErr:     true,
+		},
+	}
 
-// 			req := httptest.NewRequest("GET", "/test", nil)
-// 			req.RemoteAddr = tc.clientID
-// 			ginCtx.Request = req
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			closeChannel := make(chan bool)
+			w := &TestResponseRecorder{
+				httptest.NewRecorder(),
+				closeChannel,
+			}
+			ginCtx := testutil.NewRequest(w, testutil.MethodGet, map[string]string{
+				"Authorization": tc.bearerToken,
+			}, nil, nil, nil)
 
-// 			s := &sse{
-// 				clients: make(map[string][]*SSEConn),
-// 			}
+			s := &sse{
+				clients: sync.Map{},
+				authMw:  authMw,
+			}
 
-// 			_, err := s.HandleConnection(ginCtx)
-// 			if (err != nil) != tc.wantErr {
-// 				t.Errorf("HandleConnection() error = %v, wantErr %v", err, tc.wantErr)
-// 			}
+			u, err := s.HandleConnection(ginCtx)
+			if (err != nil) != tc.wantErr {
+				closeChannel <- true
+				close(w.closeChannel)
+				t.Errorf("HandleConnection() error = %v, wantErr %v", err, tc.wantErr)
+			}
 
-// 			if !tc.wantErr {
-// 				s.BroadcastMessage("test message")
-// 				closeChannel <- true
-// 				require.Equal(t, tc.message, w.Body.String())
-// 			}
-// 		})
-// 	}
-// }
+			if !tc.wantErr {
+				s.HandleEvent(ginCtx, *u, func(*gin.Context, any) error {
+					return nil
+				})
+				s.BroadcastMessage("test message")
+				closeChannel <- true
+				close(w.closeChannel)
+				require.Equal(t, tc.message, w.Body.String())
+			}
+		})
+	}
+}
 
 func Test_sse_BroadcastMessage(t *testing.T) {
 	// Create a new SSE server
 	s := &sse{
-		clients: make(map[string][]*SSEConn),
-		mutex:   sync.Mutex{},
+		clients: sync.Map{},
 	}
 
 	// Register a client
 	clientID := "client1"
 	messageChannel := make(chan string)
-	s.clients[clientID] = []*SSEConn{
+
+	s.clients.Store(clientID, []*SSEConn{
 		{
 			Channel: messageChannel,
 			ID:      clientID,
-		},
-	}
+		}})
 
 	message := "test message"
 
@@ -104,17 +137,17 @@ func Test_sse_BroadcastMessage(t *testing.T) {
 
 func Test_sse_SendMessage(t *testing.T) {
 	s := &sse{
-		clients: make(map[string][]*SSEConn),
-		mutex:   sync.Mutex{},
+		clients: sync.Map{},
 	}
 
 	// Create a dummy client
-	s.clients["dummyUser"] = []*SSEConn{
+	dummyClient := make(chan string, 1)
+	s.clients.Store("user1", []*SSEConn{
 		{
-			Channel: make(chan string, 1),
-			ID:      "dummyUser-client1",
+			Channel: dummyClient,
+			ID:      "user1-client1",
 		},
-	}
+	})
 
 	tests := map[string]struct {
 		userID  string
@@ -122,7 +155,7 @@ func Test_sse_SendMessage(t *testing.T) {
 		wantErr bool
 	}{
 		"success": {
-			userID:  "dummyUser",
+			userID:  "user1",
 			message: "Hello, World!",
 			wantErr: false,
 		},
@@ -147,7 +180,7 @@ func Test_sse_SendMessage(t *testing.T) {
 				}
 
 				select {
-				case msg := <-s.clients[tc.userID][0].Channel:
+				case msg := <-dummyClient:
 					if msg != tc.message {
 						t.Errorf("expected message %q but got %q", tc.message, msg)
 					}
@@ -166,16 +199,16 @@ func Test_sse_SendData(t *testing.T) {
 		Age  int    `json:"age,omitempty"`
 	}
 	s := &sse{
-		clients: make(map[string][]*SSEConn),
-		mutex:   sync.Mutex{},
+		clients: sync.Map{},
 	}
 	// Create a dummy client
-	s.clients["user1"] = []*SSEConn{
-		&SSEConn{
-			Channel: make(chan string, 1),
+	dummyClient := make(chan string, 1)
+	s.clients.Store("user1", []*SSEConn{
+		{
+			Channel: dummyClient,
 			ID:      "user1-client1",
 		},
-	}
+	})
 
 	tests := map[string]struct {
 		userID  string
@@ -217,7 +250,7 @@ func Test_sse_SendData(t *testing.T) {
 				}
 
 				select {
-				case msg := <-s.clients[tc.userID][0].Channel:
+				case msg := <-dummyClient:
 					if msg != tc.message {
 						t.Errorf("expected message %q but got %q", tc.message, msg)
 					}
@@ -235,15 +268,16 @@ func Test_sse_BroadcastData(t *testing.T) {
 		Age  int    `json:"age,omitempty"`
 	}
 	s := &sse{
-		clients: make(map[string][]*SSEConn),
-		mutex:   sync.Mutex{},
+		clients: sync.Map{},
 	}
 	// Create a dummy client
 	dummyClient := make(chan string, 1)
-	s.clients["user1"] = []*SSEConn{&SSEConn{
-		Channel: dummyClient,
-		ID:      "user1-client1",
-	}}
+	s.clients.Store("user1", []*SSEConn{
+		{
+			Channel: dummyClient,
+			ID:      "user1-client1",
+		},
+	})
 
 	tests := map[string]struct {
 		data    any
