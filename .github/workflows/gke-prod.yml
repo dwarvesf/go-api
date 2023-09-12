@@ -8,7 +8,6 @@ on:
 env:
   GITHUB_SHA: ${{ github.sha }}
   K8S_ENVIRONMENT: prod
-  GITHUB_ORG: dwarvesf
   GIT_USER: lmquang
   GIT_EMAIL: quanglm.ops@gmail.com
   REGISTRY_HOSTNAME: gcr.io
@@ -44,29 +43,25 @@ jobs:
           docker build -t $REGISTRY_HOSTNAME/$GKE_PROJECT/$APP/$IMAGE:${GITHUB_REF_NAME} .   
           docker push $REGISTRY_HOSTNAME/$GKE_PROJECT/$APP/$IMAGE:${GITHUB_REF_NAME}
 
-      # Setup kustomize
-      - name: Setup kustomize
-        run: |
-          curl -o kustomize --location https://github.com/kubernetes-sigs/kustomize/releases/download/v5.0.1/kustomize_5.0.1_linux_amd64
-          chmod u+x ./kustomize
-          mv kustomize /tmp
-      # Generate kustomize resources
+      - uses: imranismail/setup-kustomize@v2
+        with:
+          kustomize-version: "5.1.1"
+          github-token: ${{ secrets.GH_PAT }}
       - name: Generate kustomize resources
         run: |
           cd ./k8s/$K8S_ENVIRONMENT
-          /tmp/kustomize edit set image $REGISTRY_HOSTNAME/$GKE_PROJECT/$APP/$IMAGE=$REGISTRY_HOSTNAME/$GKE_PROJECT/$APP/$IMAGE:${GITHUB_SHA}
-          /tmp/kustomize build > /tmp/resources.yaml
+          kustomize edit set image $REGISTRY_HOSTNAME/$GKE_PROJECT/$APP/$IMAGE=$REGISTRY_HOSTNAME/$GKE_PROJECT/$APP/$IMAGE:${GITHUB_SHA}
+          kustomize build > /tmp/resources.yaml
 
-      # Checkout infrastructure repo, update app resources, and push to main
-      - name: Checkout $GITHUB_ORG/infrastructure
+      # Make sure the infrastructure repo is set up
+      - name: Checkout dwarvesf/infrastructure
         uses: actions/checkout@master
         with:
-          repository: $GITHUB_ORG/infrastructure
+          repository: dwarvesf/infrastructure
           token: ${{ secrets.GH_PAT }}
           path: ./infrastructure
           ref: main
-      - name: Update app resources
-        working-directory: ./temp
+      - name: Update app version
         run: |
           cd ./infrastructure/$APP/$K8S_ENVIRONMENT
           git config user.name $GIT_USER
