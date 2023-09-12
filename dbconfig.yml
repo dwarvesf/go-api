@@ -1,6 +1,10 @@
 development:
   dialect: postgres
   datasource: user=postgres password=postgres dbname=go-api-db sslmode=disable
+  
+dev:
+  dialect: postgres
+  datasource: host=${DB_HOST} dbname=${DB_NAME} user=${DB_USER} password=${DB_PASSWORD} sslmode=disable
 
 test:
   dialect: postgres
@@ -8,4 +12,4 @@ test:
 
 prod:
   dialect: postgres
-  datasource: host=localhost dbname=${DB_NAME} user=${DB_USER} password=${DB_PASSWORD} sslmode=disable
+  datasource: host=${DB_HOST} dbname=${DB_NAME} user=${DB_USER} password=${DB_PASSWORD} sslmode=disable
