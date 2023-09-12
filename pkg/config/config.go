@@ -89,6 +89,9 @@ func LoadConfig(loaders []Loader) *Config {
 			v = newV
 		}
 	}
+
+	v.AutomaticEnv()
+
 	return Generate(v)
 }
 

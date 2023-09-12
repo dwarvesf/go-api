@@ -26,9 +26,9 @@ type AuthMiddleware struct {
 }
 
 // NewAuthMiddleware new middleware
-func NewAuthMiddleware(secret string) AuthMiddleware {
+func NewAuthMiddleware(jwtH jwthelper.Helper) AuthMiddleware {
 	return AuthMiddleware{
-		jwtH: jwthelper.NewHelper(secret),
+		jwtH: jwtH,
 	}
 }
 

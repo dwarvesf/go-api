@@ -39,7 +39,7 @@ func TestHandleConnection(t *testing.T) {
 		"nbf":  jwt.NewNumericDate(now),
 		"iat":  jwt.NewNumericDate(now),
 	})
-	authMw := middleware.NewAuthMiddleware(secret)
+	authMw := middleware.NewAuthMiddleware(jwtH)
 
 	tests := map[string]struct {
 		clientID    string

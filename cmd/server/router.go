@@ -7,6 +7,7 @@ import (
 	"github.com/dwarvesf/go-api/pkg/logger/monitor"
 	"github.com/dwarvesf/go-api/pkg/middleware"
 	"github.com/dwarvesf/go-api/pkg/realtime"
+	"github.com/dwarvesf/go-api/pkg/service/jwthelper"
 	"github.com/dwarvesf/go-api/pkg/util"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -93,7 +94,7 @@ func publicHandler(r *gin.Engine, a App) {
 func authenticatedHandler(r *gin.Engine, a App) {
 
 	// api/v1
-	authMw := middleware.NewAuthMiddleware(a.cfg.SecretKey)
+	authMw := middleware.NewAuthMiddleware(jwthelper.NewHelper(a.cfg.SecretKey))
 	apiV1 := r.Group("/api/v1")
 	apiV1.Use(authMw.WithAuth)
 	portalGroup := apiV1.Group("/portal")

@@ -95,9 +95,9 @@ func (s *ws) HandleConnection(c *gin.Context) (*User, error) {
 func (s *ws) HandleEvent(c *gin.Context, u User, callback func(*gin.Context, any) error) {
 	var conn *Conn
 	s.mutex.RLock()
-	defer s.mutex.RUnlock()
 	devices, ok := s.clients[u.ID]
 	if !ok {
+		s.mutex.RUnlock()
 		return
 	}
 	for _, device := range devices {
@@ -106,6 +106,7 @@ func (s *ws) HandleEvent(c *gin.Context, u User, callback func(*gin.Context, any
 			break
 		}
 	}
+	s.mutex.RUnlock()
 
 	defer s.DisconnectUser(u)
 

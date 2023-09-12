@@ -5,6 +5,9 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/dwarvesf/go-api/pkg/logger"
+	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -217,6 +220,68 @@ func Test_ws_BroadcastData(t *testing.T) {
 			if string(mockConnection.content) != tc.message {
 				t.Errorf("%v case: expected message %q but got %q", name, tc.message, string(mockConnection.content))
 			}
+		})
+	}
+}
+
+func Test_ws_HandleEvent(t *testing.T) {
+	l := logger.NewLogger()
+	type mocked struct {
+		ID       string
+		DeviceID string
+		Conn     *mockSocket
+	}
+	type args struct {
+		c        *gin.Context
+		u        User
+		callback func(*gin.Context, any) error
+	}
+	tests := map[string]struct {
+		mocked mocked
+		args   args
+	}{
+		"empty": {
+			args: args{
+				c:        &gin.Context{},
+				u:        User{},
+				callback: func(*gin.Context, any) error { return nil },
+			},
+		},
+		"callback got error": {
+			mocked: mocked{
+				ID:       "user1",
+				DeviceID: "device1",
+				Conn: &mockSocket{
+					content: []byte{},
+				},
+			},
+			args: args{
+				c:        &gin.Context{},
+				u:        User{ID: "user1", DeviceID: "device1"},
+				callback: func(*gin.Context, any) error { return errors.New("error") },
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			clients := make(map[string][]*Conn, 0)
+
+			if tt.mocked.ID != "" {
+				clients = map[string][]*Conn{
+					tt.mocked.ID: {
+						{
+							Socket:   tt.mocked.Conn,
+							DeviceID: tt.mocked.DeviceID,
+						},
+					},
+				}
+			}
+			s := &ws{
+				clients: clients,
+				mutex:   sync.RWMutex{},
+				log:     l,
+			}
+			s.HandleEvent(tt.args.c, tt.args.u, tt.args.callback)
 		})
 	}
 }

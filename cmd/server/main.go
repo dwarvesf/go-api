@@ -17,6 +17,7 @@ import (
 	"github.com/dwarvesf/go-api/pkg/repository"
 	"github.com/dwarvesf/go-api/pkg/repository/db"
 	"github.com/dwarvesf/go-api/pkg/service"
+	"github.com/dwarvesf/go-api/pkg/service/jwthelper"
 )
 
 // @title           APP API DOCUMENT
@@ -47,7 +48,7 @@ func main() {
 	l := logger.NewLogByConfig(cfg)
 	l.Infof("Server starting")
 
-	authMw := middleware.NewAuthMiddleware(cfg.SecretKey)
+	authMw := middleware.NewAuthMiddleware(jwthelper.NewHelper(cfg.SecretKey))
 	a := App{
 		l:              l,
 		cfg:            cfg,
