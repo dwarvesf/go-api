@@ -10,6 +10,8 @@ import (
 	"github.com/dwarvesf/go-api/pkg/logger/monitor"
 	"github.com/dwarvesf/go-api/pkg/repository"
 	"github.com/dwarvesf/go-api/pkg/repository/db"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func main() {
@@ -29,7 +31,16 @@ func main() {
 	}
 	defer sentryMonitor.Clean(2 * time.Second)
 
+	// new span for sentmail job
+	opts := []trace.SpanStartOption{
+		trace.WithAttributes(attribute.String("job", "SentMail")),
+		trace.WithSpanKind(trace.SpanKindUnspecified),
+	}
+	spanName := "main"
+	ctx, span := sentryMonitor.Start(context.Background(), spanName, opts...)
+	defer span.End()
+
 	// new controler
 	c := user.NewUserController(*cfg, repository.NewRepo(), sentryMonitor)
-	c.SentMail(context.Background())
+	c.SentMail(ctx)
 }
