@@ -15,13 +15,13 @@ type Handler struct {
 	cfg      config.Config
 	log      logger.Log
 	svc      service.Service
-	monitor  monitor.Exporter
+	monitor  monitor.Tracer
 	authCtrl auth.Controller
 	userCtrl user.Controller
 }
 
 // New will return an instance of Auth struct
-func New(cfg config.Config, l logger.Log, repo *repository.Repo, svc service.Service, monitor monitor.Exporter) *Handler {
+func New(cfg config.Config, l logger.Log, repo *repository.Repo, svc service.Service, monitor monitor.Tracer) *Handler {
 	return &Handler{
 		cfg:      cfg,
 		log:      l,

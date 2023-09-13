@@ -10,7 +10,7 @@ import (
 
 func (c *impl) Me(ctx context.Context) (*model.User, error) {
 	const spanName = "MeController"
-	ctx, span := c.monitor.NewSpan(ctx, spanName)
+	ctx, span := c.monitor.Start(ctx, spanName)
 	defer span.End()
 
 	uID, err := middleware.UserIDFromContext(ctx)

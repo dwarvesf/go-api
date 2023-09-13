@@ -23,13 +23,10 @@ import (
 // @Router /portal/me [get]
 func (h Handler) Me(c *gin.Context) {
 	const spanName = "meHandler"
-	newCtx, span := h.monitor.NewSpan(c.Request.Context(), spanName)
+	ctx, span := h.monitor.Start(c.Request.Context(), spanName)
 	defer span.End()
 
-	// Update c ctx to newCtx
-	c.Request = c.Request.WithContext(newCtx)
-
-	rs, err := h.userCtrl.Me(c.Request.Context())
+	rs, err := h.userCtrl.Me(ctx)
 	if err != nil {
 		util.HandleError(c, err)
 		return
@@ -58,11 +55,8 @@ func (h Handler) Me(c *gin.Context) {
 // @Router /portal/users [put]
 func (h Handler) UpdateUser(c *gin.Context) {
 	const spanName = "updateUserHandler"
-	newCtx, span := h.monitor.NewSpan(c.Request.Context(), spanName)
+	ctx, span := h.monitor.Start(c.Request.Context(), spanName)
 	defer span.End()
-
-	// Update c ctx to newCtx
-	c.Request = c.Request.WithContext(newCtx)
 
 	var req view.UpdateUserRequest
 	err := c.ShouldBindJSON(&req)
@@ -72,7 +66,7 @@ func (h Handler) UpdateUser(c *gin.Context) {
 	}
 
 	rs, err := h.userCtrl.UpdateUser(
-		c.Request.Context(),
+		ctx,
 		model.UpdateUserRequest{
 			FullName: req.FullName,
 			Avatar:   req.Avatar,
@@ -107,11 +101,8 @@ func (h Handler) UpdateUser(c *gin.Context) {
 // @Router /portal/users/password [put]
 func (h Handler) UpdatePassword(c *gin.Context) {
 	const spanName = "updatePasswordHandler"
-	newCtx, span := h.monitor.NewSpan(c.Request.Context(), spanName)
+	ctx, span := h.monitor.Start(c.Request.Context(), spanName)
 	defer span.End()
-
-	// Update c ctx to newCtx
-	c.Request = c.Request.WithContext(newCtx)
 
 	var req view.UpdatePasswordRequest
 	err := c.ShouldBindJSON(&req)
@@ -121,7 +112,7 @@ func (h Handler) UpdatePassword(c *gin.Context) {
 	}
 
 	err = h.userCtrl.UpdatePassword(
-		c.Request.Context(),
+		ctx,
 		model.UpdatePasswordRequest{
 			NewPassword: req.NewPassword,
 			OldPassword: req.OldPassword,

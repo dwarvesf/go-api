@@ -4,6 +4,7 @@ import (
 	"github.com/dwarvesf/go-api/docs"
 	"github.com/dwarvesf/go-api/pkg/handler"
 	"github.com/dwarvesf/go-api/pkg/handler/v1/portal"
+	"github.com/dwarvesf/go-api/pkg/logger/monitor"
 	"github.com/dwarvesf/go-api/pkg/middleware"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -42,10 +43,10 @@ func setupRouter(a App) *gin.Engine {
 	if a.cfg.SentryDSN != "" {
 		// Once it's done, you can attach the handler as one of your middleware
 		r.Use(otelgin.Middleware("api-service"))
-	}
 
-	// recover when panic middleware
-	r.Use(a.monitor.PanicAlarmMiddleware())
+		// recover when panic middleware
+		r.Use(monitor.SentryPanicMiddleware(a.l))
+	}
 
 	// handlers
 	publicHandler(r, a)

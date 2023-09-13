@@ -21,12 +21,12 @@ type impl struct {
 	repo           *repository.Repo
 	jwtHelper      jwthelper.Helper
 	cfg            config.Config
-	monitor        monitor.Exporter
+	monitor        monitor.Tracer
 	passwordHelper passwordhelper.Helper
 }
 
 // NewAuthController new auth controller
-func NewAuthController(cfg config.Config, r *repository.Repo, monitor monitor.Exporter) Controller {
+func NewAuthController(cfg config.Config, r *repository.Repo, monitor monitor.Tracer) Controller {
 	return &impl{
 		repo:           r,
 		jwtHelper:      jwthelper.NewHelper(cfg.SecretKey),

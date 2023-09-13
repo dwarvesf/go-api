@@ -11,7 +11,7 @@ import (
 
 func (c impl) Signup(ctx context.Context, req model.SignupRequest) (err error) {
 	const spanName = "LoginController"
-	ctx, span := c.monitor.NewSpan(ctx, spanName)
+	ctx, span := c.monitor.Start(ctx, spanName)
 	defer span.End()
 
 	req.Salt = c.passwordHelper.GenerateSalt()

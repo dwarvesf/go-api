@@ -20,11 +20,11 @@ type Controller interface {
 type impl struct {
 	repo    *repository.Repo
 	cfg     config.Config
-	monitor monitor.Exporter
+	monitor monitor.Tracer
 }
 
 // NewUserController new auth controller
-func NewUserController(cfg config.Config, r *repository.Repo, monitor monitor.Exporter) Controller {
+func NewUserController(cfg config.Config, r *repository.Repo, monitor monitor.Tracer) Controller {
 	return &impl{
 		repo:    r,
 		cfg:     cfg,

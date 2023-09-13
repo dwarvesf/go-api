@@ -13,11 +13,11 @@ import (
 type Handler struct {
 	log     *log.Logger
 	cfg     config.Config
-	monitor monitor.Exporter
+	monitor monitor.Tracer
 }
 
 // New will return an instance of Auth struct
-func New(cfg config.Config, monitor monitor.Exporter) *Handler {
+func New(cfg config.Config, monitor monitor.Tracer) *Handler {
 
 	return &Handler{
 		log:     log.Default(),

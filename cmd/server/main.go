@@ -36,15 +36,13 @@ import (
 // @name Authorization
 func main() {
 	cfg := config.LoadConfig(config.DefaultConfigLoaders())
-	sentryMonitor, err := monitor.NewSentry(cfg)
+	sMonitor, err := monitor.NewSentry(cfg)
 	if err != nil {
 		log.Fatal(err, "failed to init sentry")
 	}
-	if sentryMonitor.Client != nil {
-		defer sentryMonitor.Client.Flush(2 * time.Second)
-	}
+	defer sMonitor.Clean(2 * time.Second)
 
-	l := logger.NewLogByConfig(cfg, sentryMonitor.Client)
+	l := logger.NewLogByConfig(cfg)
 	l.Infof("Server starting")
 
 	a := App{
@@ -52,7 +50,7 @@ func main() {
 		cfg:     cfg,
 		service: service.New(cfg),
 		repo:    repository.NewRepo(),
-		monitor: sentryMonitor,
+		monitor: sMonitor,
 	}
 
 	_, err = db.Init(*cfg)
@@ -100,5 +98,5 @@ type App struct {
 	cfg     *config.Config
 	service service.Service
 	repo    *repository.Repo
-	monitor monitor.Exporter
+	monitor monitor.Tracer
 }

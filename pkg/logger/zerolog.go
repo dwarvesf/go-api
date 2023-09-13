@@ -25,7 +25,7 @@ func NewLogger() Log {
 }
 
 // NewLogByConfig new zerolog impl
-func NewLogByConfig(cfg *config.Config, sentryClient *sentry.Client) Log {
+func NewLogByConfig(cfg *config.Config) Log {
 	// UNIX Time is faster and smaller than most timestamps
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
