@@ -1,19 +1,29 @@
-FROM golang:1.21-alpine
+FROM dwarvesf/sql-migrate as sql-migrate
+
+FROM golang:1.21-alpine as builder
 RUN mkdir /build
 WORKDIR /build
-COPY . .
+
+# manage app deps
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
+# prepare base deps
 ENV GOOS=linux GOARCH=amd64 CGO_ENABLED=0
 RUN set -ex && \
-    apk add --no-progress --no-cache \
-    gcc \
+    apk add --no-progress \
     musl-dev
-RUN go install --tags musl ./...
-RUN go install github.com/rubenv/sql-migrate/sql-migrate@latest
+
+# build
+COPY . .
+RUN go install -v --tags musl ./...
 
 FROM alpine:3.18.0
-RUN apk --no-cache add ca-certificates
+RUN apk add ca-certificates
 WORKDIR /
-COPY --from=0 /go/bin/* /usr/bin/
+COPY --from=sql-migrate /usr/local/bin/sql-migrate /usr/bin/
+COPY --from=builder /go/bin/* /usr/bin/
 COPY migrations /migrations
 COPY dbconfig.yml .
 
