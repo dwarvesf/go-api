@@ -33,6 +33,6 @@ jobs:
         run: npm audit signatures
       # pinned version updated automatically by Renovate.
       # details at https://semantic-release.gitbook.io/semantic-release/usage/installation#global-installation
-      - run: npx semantic-release@21.0.2
+      - run: npx semantic-release@21.0.2 -d
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
