@@ -31,6 +31,8 @@ type User struct {
 	Salt           string    `boil:"salt" json:"salt" toml:"salt" yaml:"salt"`
 	Avatar         string    `boil:"avatar" json:"avatar" toml:"avatar" yaml:"avatar"`
 	Role           string    `boil:"role" json:"role" toml:"role" yaml:"role"`
+	Title          string    `boil:"title" json:"title" toml:"title" yaml:"title"`
+	Department     string    `boil:"department" json:"department" toml:"department" yaml:"department"`
 	CreatedAt      time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt      time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
@@ -47,6 +49,8 @@ var UserColumns = struct {
 	Salt           string
 	Avatar         string
 	Role           string
+	Title          string
+	Department     string
 	CreatedAt      string
 	UpdatedAt      string
 }{
@@ -58,6 +62,8 @@ var UserColumns = struct {
 	Salt:           "salt",
 	Avatar:         "avatar",
 	Role:           "role",
+	Title:          "title",
+	Department:     "department",
 	CreatedAt:      "created_at",
 	UpdatedAt:      "updated_at",
 }
@@ -71,6 +77,8 @@ var UserTableColumns = struct {
 	Salt           string
 	Avatar         string
 	Role           string
+	Title          string
+	Department     string
 	CreatedAt      string
 	UpdatedAt      string
 }{
@@ -82,6 +90,8 @@ var UserTableColumns = struct {
 	Salt:           "users.salt",
 	Avatar:         "users.avatar",
 	Role:           "users.role",
+	Title:          "users.title",
+	Department:     "users.department",
 	CreatedAt:      "users.created_at",
 	UpdatedAt:      "users.updated_at",
 }
@@ -141,6 +151,8 @@ var UserWhere = struct {
 	Salt           whereHelperstring
 	Avatar         whereHelperstring
 	Role           whereHelperstring
+	Title          whereHelperstring
+	Department     whereHelperstring
 	CreatedAt      whereHelpertime_Time
 	UpdatedAt      whereHelpertime_Time
 }{
@@ -152,6 +164,8 @@ var UserWhere = struct {
 	Salt:           whereHelperstring{field: "\"users\".\"salt\""},
 	Avatar:         whereHelperstring{field: "\"users\".\"avatar\""},
 	Role:           whereHelperstring{field: "\"users\".\"role\""},
+	Title:          whereHelperstring{field: "\"users\".\"title\""},
+	Department:     whereHelperstring{field: "\"users\".\"department\""},
 	CreatedAt:      whereHelpertime_Time{field: "\"users\".\"created_at\""},
 	UpdatedAt:      whereHelpertime_Time{field: "\"users\".\"updated_at\""},
 }
@@ -173,9 +187,9 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "status", "email", "name", "hashed_password", "salt", "avatar", "role", "created_at", "updated_at"}
+	userAllColumns            = []string{"id", "status", "email", "name", "hashed_password", "salt", "avatar", "role", "title", "department", "created_at", "updated_at"}
 	userColumnsWithoutDefault = []string{"email", "name", "hashed_password", "salt"}
-	userColumnsWithDefault    = []string{"id", "status", "avatar", "role", "created_at", "updated_at"}
+	userColumnsWithDefault    = []string{"id", "status", "avatar", "role", "title", "department", "created_at", "updated_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 	userGeneratedColumns      = []string{}
 )

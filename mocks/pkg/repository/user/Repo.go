@@ -184,17 +184,17 @@ func (_c *Repo_GetByEmail_Call) RunAndReturn(run func(db.Context, string) (*mode
 	return _c
 }
 
-// GetByID provides a mock function with given fields: ctx, id
-func (_m *Repo) GetByID(ctx db.Context, id int) (*model.User, error) {
-	ret := _m.Called(ctx, id)
+// GetByID provides a mock function with given fields: ctx, uID
+func (_m *Repo) GetByID(ctx db.Context, uID int) (*model.User, error) {
+	ret := _m.Called(ctx, uID)
 
 	var r0 *model.User
 	var r1 error
 	if rf, ok := ret.Get(0).(func(db.Context, int) (*model.User, error)); ok {
-		return rf(ctx, id)
+		return rf(ctx, uID)
 	}
 	if rf, ok := ret.Get(0).(func(db.Context, int) *model.User); ok {
-		r0 = rf(ctx, id)
+		r0 = rf(ctx, uID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.User)
@@ -202,7 +202,7 @@ func (_m *Repo) GetByID(ctx db.Context, id int) (*model.User, error) {
 	}
 
 	if rf, ok := ret.Get(1).(func(db.Context, int) error); ok {
-		r1 = rf(ctx, id)
+		r1 = rf(ctx, uID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -217,12 +217,12 @@ type Repo_GetByID_Call struct {
 
 // GetByID is a helper method to define mock.On call
 //   - ctx db.Context
-//   - id int
-func (_e *Repo_Expecter) GetByID(ctx interface{}, id interface{}) *Repo_GetByID_Call {
-	return &Repo_GetByID_Call{Call: _e.mock.On("GetByID", ctx, id)}
+//   - uID int
+func (_e *Repo_Expecter) GetByID(ctx interface{}, uID interface{}) *Repo_GetByID_Call {
+	return &Repo_GetByID_Call{Call: _e.mock.On("GetByID", ctx, uID)}
 }
 
-func (_c *Repo_GetByID_Call) Run(run func(ctx db.Context, id int)) *Repo_GetByID_Call {
+func (_c *Repo_GetByID_Call) Run(run func(ctx db.Context, uID int)) *Repo_GetByID_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(db.Context), args[1].(int))
 	})

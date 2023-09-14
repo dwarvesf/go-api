@@ -31,7 +31,7 @@ func (c impl) Login(ctx context.Context, req model.LoginRequest) (*model.LoginRe
 	token, err := c.jwtHelper.GenerateJWTToken(map[string]interface{}{
 		"sub":  user.ID,
 		"iss":  c.cfg.App,
-		"role": "user",
+		"role": user.Role,
 		"exp":  jwt.NewNumericDate(now.AddDate(1, 0, 0)),
 		"nbf":  jwt.NewNumericDate(now),
 		"iat":  jwt.NewNumericDate(now),

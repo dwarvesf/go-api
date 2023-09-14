@@ -26,8 +26,21 @@ type UserResponse = Response[User] // @name UserResponse
 
 // User represent the user
 type User struct {
-	ID       int    `json:"id" validate:"required"`
-	Email    string `json:"email" validate:"required"`
-	FullName string `json:"fullName" validate:"required"`
-	Avatar   string `json:"avatar" validate:"required"`
+	ID         int    `json:"id" validate:"required"`
+	Email      string `json:"email" validate:"required"`
+	FullName   string `json:"fullName" validate:"required"`
+	Avatar     string `json:"avatar" validate:"required"`
+	Status     string `json:"status" validate:"required"`
+	Title      string `json:"title" validate:"required"`
+	Department string `json:"department" validate:"required"`
+	Role       string `json:"role" validate:"required"`
 } // @name User
+
+// GetUsersListRequest represent the user list request
+type GetUsersListRequest struct {
+	Page     int `json:"page"`
+	PageSize int `json:"pageSize"`
+} // @name GetUsersListRequest
+
+// UsersListResponse represent the user list response
+type UsersListResponse = ListResponse[User] // @name UsersListResponse
