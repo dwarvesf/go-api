@@ -12,9 +12,12 @@ import (
 )
 
 func (c impl) Login(ctx context.Context, req model.LoginRequest) (*model.LoginResponse, error) {
-	const spanName = "LoginController"
-	ctx, span := c.monitor.Start(ctx, spanName)
-	defer span.End()
+	if c.monitor != nil {
+		const spanName = "LoginController"
+		newCtx, span := c.monitor.Start(ctx, spanName)
+		ctx = newCtx
+		defer span.End()
+	}
 
 	dbCtx := db.FromContext(ctx)
 	user, err := c.repo.User.GetByEmail(dbCtx, req.Email)

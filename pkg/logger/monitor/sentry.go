@@ -60,7 +60,6 @@ func NewSentry(cfg *config.Config) (Tracer, error) {
 }
 
 func (s *sentryTracer) Start(ctx context.Context, spanName string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
-	// TODO: validate when otel.Tracer is nil
 	return otel.Tracer(spanName).Start(ctx, spanName, opts...)
 }
 
