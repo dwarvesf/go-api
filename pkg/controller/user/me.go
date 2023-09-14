@@ -9,12 +9,9 @@ import (
 )
 
 func (c *impl) Me(ctx context.Context) (*model.User, error) {
-	if c.monitor != nil {
-		const spanName = "MeController"
-		newCtx, span := c.monitor.Start(ctx, spanName)
-		ctx = newCtx
-		defer span.End()
-	}
+	const spanName = "MeController"
+	ctx, span := c.monitor.Start(ctx, spanName)
+	defer span.End()
 
 	uID, err := middleware.UserIDFromContext(ctx)
 	if err != nil {

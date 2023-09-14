@@ -7,6 +7,7 @@ import (
 
 	mocks "github.com/dwarvesf/go-api/mocks/pkg/repository/user"
 	"github.com/dwarvesf/go-api/pkg/config"
+	"github.com/dwarvesf/go-api/pkg/logger/monitor"
 	"github.com/dwarvesf/go-api/pkg/middleware"
 	"github.com/dwarvesf/go-api/pkg/model"
 	"github.com/dwarvesf/go-api/pkg/repository"
@@ -81,7 +82,8 @@ func Test_impl_Me(t *testing.T) {
 				repo: &repository.Repo{
 					User: userRepoMock,
 				},
-				cfg: config.LoadTestConfig(),
+				cfg:     config.LoadTestConfig(),
+				monitor: monitor.TestMonitor(),
 			}
 
 			_, err := db.Init(c.cfg)

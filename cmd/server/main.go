@@ -40,10 +40,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err, "failed to init sentry")
 	}
-
-	if sMonitor != nil {
-		defer sMonitor.Clean(2 * time.Second)
-	}
+	defer sMonitor.Clean(2 * time.Second)
 
 	l := logger.NewLogByConfig(cfg)
 	l.Infof("Server starting")

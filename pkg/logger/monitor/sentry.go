@@ -22,7 +22,7 @@ type sentryTracer struct {
 func NewSentry(cfg *config.Config) (Tracer, error) {
 	if cfg.SentryDSN == "" {
 		log.Println("Sentry DSN not provided. Not using Sentry Error Reporting")
-		return nil, nil
+		return &nilMonitor{}, nil
 	}
 
 	hub := sentry.CurrentHub()

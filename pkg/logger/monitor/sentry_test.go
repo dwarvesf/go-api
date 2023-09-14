@@ -1,43 +1,103 @@
-// package monitor
+package monitor
 
-// import (
-// 	"testing"
-// 	"time"
+import (
+	"context"
+	"testing"
+	"time"
 
-// 	"github.com/stretchr/testify/mock"
-// )
+	"github.com/dwarvesf/go-api/pkg/config"
+)
 
-// // Define an interface for the sentry client
-// type SentryClient interface {
-// 	Flush(timeout time.Duration)
-// 	// Add other methods here as needed
-// }
+func TestNewSentry(t *testing.T) {
+	tests := map[string]struct {
+		cfg       *config.Config
+		expectErr bool
+	}{
+		"empty dsn": {
+			cfg: &config.Config{
+				SentryDSN: "",
+			},
+			expectErr: false,
+		},
+		"valid dsn": {
+			cfg: &config.Config{
+				SentryDSN: "https://examplePublicKey@o0.ingest.sentry.io/0",
+			},
+			expectErr: false,
+		},
+		"invalid dsn": {
+			cfg: &config.Config{
+				SentryDSN: "invalid",
+			},
+			expectErr: true,
+		},
+	}
 
-// // Define a mock for the sentry client
-// type MockSentryClient struct {
-// 	mock.Mock
-// }
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			_, err := NewSentry(tc.cfg)
+			if tc.expectErr {
+				if err == nil {
+					t.Errorf("Expected error, got nil")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Unexpected error: %v", err)
+				}
+			}
+		})
+	}
+}
 
-// func (m *MockSentryClient) Flush(timeout time.Duration) {
-// 	m.Called(timeout)
-// }
+func TestSentryTracer_Start(t *testing.T) {
+	tests := map[string]struct {
+		spanName string
+	}{
+		"empty span name": {
+			spanName: "",
+		},
+		"valid span name": {
+			spanName: "testSpan",
+		},
+	}
 
-// func TestClean(t *testing.T) {
-// 	// Create an instance of the MockSentryClient
-// 	mockClient := new(MockSentryClient)
+	cfg := &config.Config{
+		SentryDSN: "https://examplePublicKey@o0.ingest.sentry.io/0",
+	}
 
-// 	// Create a sentryTracer instance with the mock client
-// 	tracer := &sentryTracer{client: mockClient}
+	tracer, _ := NewSentry(cfg)
 
-// 	// Define the expected timeout duration
-// 	expectedTimeout := time.Second * 5
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			ctx, _ := tracer.Start(context.Background(), tc.spanName)
+			if ctx == nil {
+				t.Errorf("Expected context, got nil")
+			}
+		})
+	}
+}
 
-// 	// Expect the Flush method to be called with the expected timeout
-// 	mockClient.On("Flush", expectedTimeout).Once()
+func TestSentryTracer_Clean(t *testing.T) {
+	tests := map[string]struct {
+		timeout time.Duration
+	}{
+		"zero timeout": {
+			timeout: 0,
+		},
+		"positive timeout": {
+			timeout: 2 * time.Second,
+		},
+	}
 
-// 	// Call the Clean method with the expected timeout
-// 	tracer.Clean(expectedTimeout)
+	cfg := &config.Config{
+		SentryDSN: "https://examplePublicKey@o0.ingest.sentry.io/0",
+	}
 
-// 	// Assert that the Flush method was called as expected
-// 	mockClient.AssertExpectations(t)
-// }
+	tracer, _ := NewSentry(cfg)
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			tracer.Clean(tc.timeout)
+		})
+	}
+}

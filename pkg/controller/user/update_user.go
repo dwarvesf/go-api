@@ -9,12 +9,9 @@ import (
 )
 
 func (c *impl) UpdateUser(ctx context.Context, user model.UpdateUserRequest) (*model.User, error) {
-	if c.monitor != nil {
-		const spanName = "UpdateUserController"
-		newCtx, span := c.monitor.Start(ctx, spanName)
-		ctx = newCtx
-		defer span.End()
-	}
+	const spanName = "UpdateUserController"
+	ctx, span := c.monitor.Start(ctx, spanName)
+	defer span.End()
 
 	uID, err := middleware.UserIDFromContext(ctx)
 	if err != nil {

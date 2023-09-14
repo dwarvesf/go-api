@@ -9,12 +9,9 @@ import (
 )
 
 func (c impl) UpdatePassword(ctx context.Context, user model.UpdatePasswordRequest) error {
-	if c.monitor != nil {
-		const spanName = "UpdatePasswordController"
-		newCtx, span := c.monitor.Start(ctx, spanName)
-		ctx = newCtx
-		defer span.End()
-	}
+	const spanName = "UpdatePasswordController"
+	ctx, span := c.monitor.Start(ctx, spanName)
+	defer span.End()
 
 	uID, err := middleware.UserIDFromContext(ctx)
 	if err != nil {

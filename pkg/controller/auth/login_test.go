@@ -12,6 +12,7 @@ import (
 	passworkmocks "github.com/dwarvesf/go-api/mocks/pkg/service/passwordhelper"
 	"github.com/dwarvesf/go-api/pkg/config"
 	"github.com/dwarvesf/go-api/pkg/handler/testutil"
+	"github.com/dwarvesf/go-api/pkg/logger/monitor"
 	"github.com/dwarvesf/go-api/pkg/model"
 	"github.com/dwarvesf/go-api/pkg/repository"
 	"github.com/dwarvesf/go-api/pkg/repository/db"
@@ -197,6 +198,7 @@ func Test_impl_Login(t *testing.T) {
 				jwtHelper:      jwtMock,
 				passwordHelper: passwordMock,
 				cfg:            config.LoadTestConfig(),
+				monitor:        monitor.TestMonitor(),
 			}
 
 			_, err = db.Init(c.cfg)

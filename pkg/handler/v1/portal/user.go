@@ -22,14 +22,11 @@ import (
 // @Failure 500 {object} ErrorResponse
 // @Router /portal/me [get]
 func (h Handler) Me(c *gin.Context) {
-	if h.monitor != nil {
-		const spanName = "meHandler"
-		newCtx, span := h.monitor.Start(c.Request.Context(), spanName)
-		c.Request = c.Request.WithContext(newCtx)
-		defer span.End()
-	}
+	const spanName = "meHandler"
+	ctx, span := h.monitor.Start(c.Request.Context(), spanName)
+	defer span.End()
 
-	rs, err := h.userCtrl.Me(c.Request.Context())
+	rs, err := h.userCtrl.Me(ctx)
 	if err != nil {
 		util.HandleError(c, err)
 		return
@@ -57,12 +54,9 @@ func (h Handler) Me(c *gin.Context) {
 // @Failure 500 {object} ErrorResponse
 // @Router /portal/users [put]
 func (h Handler) UpdateUser(c *gin.Context) {
-	if h.monitor != nil {
-		const spanName = "updateUserHandler"
-		newCtx, span := h.monitor.Start(c.Request.Context(), spanName)
-		c.Request = c.Request.WithContext(newCtx)
-		defer span.End()
-	}
+	const spanName = "updateUserHandler"
+	ctx, span := h.monitor.Start(c.Request.Context(), spanName)
+	defer span.End()
 
 	var req view.UpdateUserRequest
 	err := c.ShouldBindJSON(&req)
@@ -72,7 +66,7 @@ func (h Handler) UpdateUser(c *gin.Context) {
 	}
 
 	rs, err := h.userCtrl.UpdateUser(
-		c.Request.Context(),
+		ctx,
 		model.UpdateUserRequest{
 			FullName: req.FullName,
 			Avatar:   req.Avatar,
@@ -106,12 +100,9 @@ func (h Handler) UpdateUser(c *gin.Context) {
 // @Failure 500 {object} ErrorResponse
 // @Router /portal/users/password [put]
 func (h Handler) UpdatePassword(c *gin.Context) {
-	if h.monitor != nil {
-		const spanName = "updatePasswordHandler"
-		newCtx, span := h.monitor.Start(c.Request.Context(), spanName)
-		c.Request = c.Request.WithContext(newCtx)
-		defer span.End()
-	}
+	const spanName = "updatePasswordHandler"
+	ctx, span := h.monitor.Start(c.Request.Context(), spanName)
+	defer span.End()
 
 	var req view.UpdatePasswordRequest
 	err := c.ShouldBindJSON(&req)
@@ -121,7 +112,7 @@ func (h Handler) UpdatePassword(c *gin.Context) {
 	}
 
 	err = h.userCtrl.UpdatePassword(
-		c.Request.Context(),
+		ctx,
 		model.UpdatePasswordRequest{
 			NewPassword: req.NewPassword,
 			OldPassword: req.OldPassword,

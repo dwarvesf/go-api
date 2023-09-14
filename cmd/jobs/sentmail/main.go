@@ -30,9 +30,7 @@ func main() {
 		l.Fatal(err, "failed to init sentry")
 	}
 
-	if sentryMonitor != nil {
-		defer sentryMonitor.Clean(2 * time.Second)
-	}
+	defer sentryMonitor.Clean(2 * time.Second)
 
 	// new span for sentmail job
 	opts := []trace.SpanStartOption{
