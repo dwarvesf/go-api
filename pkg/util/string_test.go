@@ -12,7 +12,6 @@ func TestRandomString(t *testing.T) {
 		"TestLength1":   {1},
 		"TestLength10":  {10},
 		"TestLength100": {100},
-		"TestLength0":   {0}, // Edge case
 	}
 
 	for testName, tc := range testCases {

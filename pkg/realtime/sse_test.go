@@ -111,11 +111,12 @@ func Test_sse_BroadcastMessage(t *testing.T) {
 	clientID := "client1"
 	messageChannel := make(chan string)
 
-	s.clients.Store(clientID, []*SSEConn{
-		{
+	s.clients.Store(clientID, map[string]*SSEConn{
+		clientID: {
 			Channel: messageChannel,
 			ID:      clientID,
-		}})
+		},
+	})
 
 	message := "test message"
 
@@ -142,8 +143,8 @@ func Test_sse_SendMessage(t *testing.T) {
 
 	// Create a dummy client
 	dummyClient := make(chan string, 1)
-	s.clients.Store("user1", []*SSEConn{
-		{
+	s.clients.Store("user1", map[string]*SSEConn{
+		"user1-client1": {
 			Channel: dummyClient,
 			ID:      "user1-client1",
 		},
@@ -203,8 +204,8 @@ func Test_sse_SendData(t *testing.T) {
 	}
 	// Create a dummy client
 	dummyClient := make(chan string, 1)
-	s.clients.Store("user1", []*SSEConn{
-		{
+	s.clients.Store("user1", map[string]*SSEConn{
+		"user1-client1": {
 			Channel: dummyClient,
 			ID:      "user1-client1",
 		},
@@ -272,8 +273,8 @@ func Test_sse_BroadcastData(t *testing.T) {
 	}
 	// Create a dummy client
 	dummyClient := make(chan string, 1)
-	s.clients.Store("user1", []*SSEConn{
-		{
+	s.clients.Store("user1", map[string]*SSEConn{
+		"user1-client1": {
 			Channel: dummyClient,
 			ID:      "user1-client1",
 		},

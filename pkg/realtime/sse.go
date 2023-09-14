@@ -31,16 +31,14 @@ type SSEConn struct {
 
 type sse struct {
 	clients sync.Map
-	// mutex   sync.RWMutex
-	authMw middleware.AuthMiddleware
+	authMw  middleware.AuthMiddleware
 }
 
 // NewSSE creates a new SSE server.
 func NewSSE(authMw middleware.AuthMiddleware) Server {
 	return &sse{
 		clients: sync.Map{},
-		// mutex:   sync.RWMutex{},
-		authMw: authMw,
+		authMw:  authMw,
 	}
 }
 
@@ -76,13 +74,13 @@ func (s *sse) HandleConnection(c *gin.Context) (*User, error) {
 	// Register the client's channel for SSE updates
 	clientArr, ok := s.clients.Load(userID)
 	if !ok {
-		clientArr = make([]*SSEConn, 0)
+		clientArr = make(map[string]*SSEConn, 0)
 	}
-	clientArrData, ok := clientArr.([]*SSEConn)
+	clientArrData, ok := clientArr.(map[string]*SSEConn)
 	if !ok {
-		clientArrData = make([]*SSEConn, 0)
+		clientArrData = make(map[string]*SSEConn, 0)
 	}
-	clientArrData = append(clientArrData, device)
+	clientArrData[device.ID] = device
 	s.clients.Store(userID, clientArrData)
 
 	user := &User{
@@ -98,7 +96,7 @@ func (s *sse) HandleEvent(c *gin.Context, u User, callback func(*gin.Context, an
 	if !ok {
 		return
 	}
-	clientChArr, ok := val.([]*SSEConn)
+	clientChArr, ok := val.(map[string]*SSEConn)
 	if !ok {
 		return
 	}
@@ -107,6 +105,7 @@ func (s *sse) HandleEvent(c *gin.Context, u User, callback func(*gin.Context, an
 	for _, ch := range clientChArr {
 		if ch.ID == u.DeviceID {
 			clientCh = ch
+			break
 		}
 	}
 
@@ -134,7 +133,7 @@ func (s *sse) SendMessage(userID string, message string) error {
 	if !ok {
 		return ErrClientNotFound
 	}
-	clientChArr, ok := val.([]*SSEConn)
+	clientChArr, ok := val.(map[string]*SSEConn)
 	if !ok {
 		return ErrClientNotFound
 	}
@@ -156,7 +155,7 @@ func (s *sse) SendData(userID string, data any) error {
 	if !ok {
 		return ErrClientNotFound
 	}
-	clientChArr, ok := val.([]*SSEConn)
+	clientChArr, ok := val.(map[string]*SSEConn)
 	if !ok {
 		return ErrClientNotFound
 	}
@@ -170,12 +169,14 @@ func (s *sse) SendData(userID string, data any) error {
 
 func (s *sse) BroadcastMessage(message string) error {
 	s.clients.Range(func(key, value any) bool {
-		clientChArr, ok := value.([]*SSEConn)
+		clientChArr, ok := value.(map[string]*SSEConn)
 		if !ok {
 			return true
 		}
-		for _, clientCh := range clientChArr {
-			clientCh.Channel <- message
+		for i := range clientChArr {
+			go func(key string) {
+				clientChArr[key].Channel <- message
+			}(i)
 		}
 		return true
 	})
@@ -190,7 +191,7 @@ func (s *sse) BroadcastData(data any) error {
 	}
 
 	s.clients.Range(func(key, value any) bool {
-		clientChArr, ok := value.([]*SSEConn)
+		clientChArr, ok := value.(map[string]*SSEConn)
 		if !ok {
 			return true
 		}
@@ -208,22 +209,18 @@ func (s *sse) DisconnectUser(u User) error {
 	if !ok {
 		return nil
 	}
-	clientChArr, ok := val.([]*SSEConn)
+	clientChArr, ok := val.(map[string]*SSEConn)
 	if !ok {
 		return nil
 	}
 
-	deleteIdx := -1
-	for idx, clientCh := range clientChArr {
-		if clientCh.ID != u.DeviceID {
-			continue
-		}
-		close(clientCh.Channel)
-		deleteIdx = idx
+	clientCh, ok := clientChArr[u.DeviceID]
+	if !ok {
+		return nil
 	}
-	if deleteIdx != -1 {
-		clientChArr = append(clientChArr[:deleteIdx], clientChArr[deleteIdx+1:]...)
-	}
+
+	close(clientCh.Channel)
+	delete(clientChArr, u.DeviceID)
 
 	s.clients.Store(u.ID, clientChArr)
 	return nil

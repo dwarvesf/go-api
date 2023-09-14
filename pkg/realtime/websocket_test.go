@@ -47,7 +47,7 @@ func Test_ws_BroadcastMessage(t *testing.T) {
 	message := "Hello, World!"
 
 	server := &ws{
-		clients: make(map[string][]*Conn),
+		clients: make(map[string]map[string]*Conn),
 		mutex:   sync.RWMutex{},
 	}
 
@@ -58,7 +58,9 @@ func Test_ws_BroadcastMessage(t *testing.T) {
 		Socket:   mockConnection,
 		DeviceID: "device1",
 	}
-	server.clients[userID] = []*Conn{conn}
+	server.clients[userID] = map[string]*Conn{
+		"device1": conn,
+	}
 
 	err := server.BroadcastMessage(message)
 
@@ -68,14 +70,14 @@ func Test_ws_BroadcastMessage(t *testing.T) {
 
 func Test_ws_SendMessage(t *testing.T) {
 	s := &ws{
-		clients: make(map[string][]*Conn),
+		clients: make(map[string]map[string]*Conn),
 		mutex:   sync.RWMutex{},
 	}
 
 	// Create a dummy client
 	mockConnection := &mockSocket{}
-	s.clients["user1"] = []*Conn{
-		{
+	s.clients["user1"] = map[string]*Conn{
+		"user1-client1": {
 			Socket:   mockConnection,
 			DeviceID: "user1-client1",
 		},
@@ -122,14 +124,14 @@ func Test_ws_SendData(t *testing.T) {
 		Age  int    `json:"age,omitempty"`
 	}
 	s := &ws{
-		clients: make(map[string][]*Conn),
+		clients: make(map[string]map[string]*Conn),
 		mutex:   sync.RWMutex{},
 	}
 
 	// Create a dummy client
 	mockConnection := &mockSocket{}
-	s.clients["user1"] = []*Conn{
-		{
+	s.clients["user1"] = map[string]*Conn{
+		"user1-client1": {
 			Socket:   mockConnection,
 			DeviceID: "user1-client1",
 		},
@@ -181,14 +183,14 @@ func Test_ws_BroadcastData(t *testing.T) {
 		Age  int    `json:"age,omitempty"`
 	}
 	s := &ws{
-		clients: make(map[string][]*Conn),
+		clients: make(map[string]map[string]*Conn),
 		mutex:   sync.RWMutex{},
 	}
 
 	// Create a dummy client
 	mockConnection := &mockSocket{}
-	s.clients["user1"] = []*Conn{
-		{
+	s.clients["user1"] = map[string]*Conn{
+		"user1-client1": {
 			Socket:   mockConnection,
 			DeviceID: "user1-client1",
 		},
@@ -264,12 +266,12 @@ func Test_ws_HandleEvent(t *testing.T) {
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			clients := make(map[string][]*Conn, 0)
+			clients := make(map[string]map[string]*Conn, 0)
 
 			if tt.mocked.ID != "" {
-				clients = map[string][]*Conn{
+				clients = map[string]map[string]*Conn{
 					tt.mocked.ID: {
-						{
+						tt.mocked.DeviceID: {
 							Socket:   tt.mocked.Conn,
 							DeviceID: tt.mocked.DeviceID,
 						},

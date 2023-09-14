@@ -34,7 +34,7 @@ type Conn struct {
 }
 
 type ws struct {
-	clients map[string][]*Conn
+	clients map[string]map[string]*Conn
 	mutex   sync.RWMutex
 	authMw  middleware.AuthMiddleware
 	log     logger.Log
@@ -82,9 +82,9 @@ func (s *ws) HandleConnection(c *gin.Context) (*User, error) {
 
 	// Add the user to the server's list of clients
 	if _, found := s.clients[userID]; !found {
-		s.clients[userID] = make([]*Conn, 0)
+		s.clients[userID] = make(map[string]*Conn, 0)
 	}
-	s.clients[userID] = append(s.clients[userID], device)
+	s.clients[userID][device.DeviceID] = device
 
 	return &User{
 		ID:       userID,
@@ -100,11 +100,10 @@ func (s *ws) HandleEvent(c *gin.Context, u User, callback func(*gin.Context, any
 		s.mutex.RUnlock()
 		return
 	}
-	for _, device := range devices {
-		if device.DeviceID == u.DeviceID {
-			conn = device
-			break
-		}
+	conn, ok = devices[u.DeviceID]
+	if !ok {
+		s.mutex.RUnlock()
+		return
 	}
 	s.mutex.RUnlock()
 
@@ -135,8 +134,8 @@ func (s *ws) SendMessage(userID string, message string) error {
 		return ErrUserNotFound
 	}
 
-	for _, device := range devices {
-		err := device.Socket.WriteMessage(websocket.TextMessage, []byte(message))
+	for deviceKey := range devices {
+		err := devices[deviceKey].Socket.WriteMessage(websocket.TextMessage, []byte(message))
 		if err != nil {
 			return err
 		}
@@ -155,8 +154,8 @@ func (s *ws) SendData(userID string, data any) error {
 		return ErrUserNotFound
 	}
 
-	for _, device := range devices {
-		err := device.Socket.WriteJSON(data)
+	for deviceKey := range devices {
+		err := devices[deviceKey].Socket.WriteJSON(data)
 		if err != nil {
 			return err
 		}
@@ -170,9 +169,10 @@ func (s *ws) BroadcastMessage(message string) error {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	for _, devices := range s.clients {
-		for _, device := range devices {
-			err := device.Socket.WriteMessage(websocket.TextMessage, []byte(message))
+	for userKey := range s.clients {
+		devices := s.clients[userKey]
+		for deviceKey := range devices {
+			err := devices[deviceKey].Socket.WriteMessage(websocket.TextMessage, []byte(message))
 			if err != nil {
 				return err
 			}
@@ -187,9 +187,10 @@ func (s *ws) BroadcastData(data any) error {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	for _, devices := range s.clients {
-		for _, device := range devices {
-			err := device.Socket.WriteJSON(data)
+	for userKey := range s.clients {
+		devices := s.clients[userKey]
+		for deviceKey := range devices {
+			err := devices[deviceKey].Socket.WriteJSON(data)
 			if err != nil {
 				return err
 			}
@@ -208,13 +209,13 @@ func (s *ws) DisconnectUser(u User) error {
 		return ErrUserNotFound
 	}
 
-	for i, device := range devices {
-		if device.DeviceID == u.DeviceID {
-			device.Close()
-			devices = append(devices[:i], devices[i+1:]...)
-			return nil
-		}
+	device, found := devices[u.DeviceID]
+	if !found {
+		return ErrDeviceNotFound
 	}
 
-	return ErrDeviceNotFound
+	device.Close()
+	delete(devices, u.DeviceID)
+	s.clients[u.ID] = devices
+	return nil
 }

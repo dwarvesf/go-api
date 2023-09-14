@@ -1,14 +1,13 @@
 package util
 
-import "math/rand"
+import (
+	gonanoid "github.com/matoous/go-nanoid/v2"
+)
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 // RandomString generates a random string of length n
 func RandomString(n int) string {
-	b := make([]byte, n)
-	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
-	}
-	return string(b)
+	id := gonanoid.MustGenerate(letterBytes, n)
+	return id
 }
