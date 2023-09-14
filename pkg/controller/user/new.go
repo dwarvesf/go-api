@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/dwarvesf/go-api/pkg/config"
+	"github.com/dwarvesf/go-api/pkg/logger/monitor"
 	"github.com/dwarvesf/go-api/pkg/model"
 	"github.com/dwarvesf/go-api/pkg/repository"
 )
@@ -17,14 +18,16 @@ type Controller interface {
 }
 
 type impl struct {
-	repo *repository.Repo
-	cfg  config.Config
+	repo    *repository.Repo
+	cfg     config.Config
+	monitor monitor.Tracer
 }
 
 // NewUserController new auth controller
-func NewUserController(cfg config.Config, r *repository.Repo) Controller {
+func NewUserController(cfg config.Config, r *repository.Repo, monitor monitor.Tracer) Controller {
 	return &impl{
-		repo: r,
-		cfg:  cfg,
+		repo:    r,
+		cfg:     cfg,
+		monitor: monitor,
 	}
 }

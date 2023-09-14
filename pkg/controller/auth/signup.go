@@ -10,6 +10,10 @@ import (
 )
 
 func (c impl) Signup(ctx context.Context, req model.SignupRequest) (err error) {
+	const spanName = "SignupController"
+	ctx, span := c.monitor.Start(ctx, spanName)
+	defer span.End()
+
 	req.Salt = c.passwordHelper.GenerateSalt()
 	hashedPassword, err := c.passwordHelper.Hash(req.Password, req.Salt)
 	if err != nil {

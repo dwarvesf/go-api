@@ -9,6 +9,10 @@ import (
 )
 
 func (c *impl) Me(ctx context.Context) (*model.User, error) {
+	const spanName = "MeController"
+	ctx, span := c.monitor.Start(ctx, spanName)
+	defer span.End()
+
 	uID, err := middleware.UserIDFromContext(ctx)
 	if err != nil {
 		return nil, model.ErrInvalidToken

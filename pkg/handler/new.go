@@ -5,21 +5,24 @@ import (
 	"net/http"
 
 	"github.com/dwarvesf/go-api/pkg/config"
+	"github.com/dwarvesf/go-api/pkg/logger/monitor"
 	"github.com/gin-gonic/gin"
 )
 
 // Handler for app
 type Handler struct {
-	log *log.Logger
-	cfg config.Config
+	log     *log.Logger
+	cfg     config.Config
+	monitor monitor.Tracer
 }
 
 // New will return an instance of Auth struct
-func New(cfg config.Config) *Handler {
+func New(cfg config.Config, monitor monitor.Tracer) *Handler {
 
 	return &Handler{
-		log: log.Default(),
-		cfg: cfg,
+		log:     log.Default(),
+		cfg:     cfg,
+		monitor: monitor,
 	}
 }
 

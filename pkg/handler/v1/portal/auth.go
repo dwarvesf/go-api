@@ -22,13 +22,17 @@ import (
 // @Failure 500 {object} ErrorResponse
 // @Router /portal/auth/login [post]
 func (h Handler) Login(c *gin.Context) {
+	const spanName = "loginHandler"
+	ctx, span := h.monitor.Start(c.Request.Context(), spanName)
+	defer span.End()
+
 	var req view.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		util.HandleError(c, view.ErrBadRequest(err))
 		return
 	}
 
-	rs, err := h.authCtrl.Login(c.Request.Context(), model.LoginRequest{
+	rs, err := h.authCtrl.Login(ctx, model.LoginRequest{
 		Email:    req.Email,
 		Password: req.Password,
 	})
@@ -60,13 +64,17 @@ func (h Handler) Login(c *gin.Context) {
 // @Failure 500 {object} ErrorResponse
 // @Router /portal/auth/signup [post]
 func (h Handler) Signup(c *gin.Context) {
+	const spanName = "signupHandler"
+	ctx, span := h.monitor.Start(c.Request.Context(), spanName)
+	defer span.End()
+
 	var req view.SignupRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		util.HandleError(c, view.ErrBadRequest(err))
 		return
 	}
 
-	err := h.authCtrl.Signup(c.Request.Context(), model.SignupRequest{
+	err := h.authCtrl.Signup(ctx, model.SignupRequest{
 		Email:    req.Email,
 		Password: req.Password,
 		Name:     req.FullName,

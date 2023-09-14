@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/dwarvesf/go-api/pkg/handler/v1/view"
+	"github.com/dwarvesf/go-api/pkg/logger/monitor"
 	"github.com/dwarvesf/go-api/pkg/model"
 	"github.com/gin-gonic/gin"
 )
@@ -16,6 +17,7 @@ func HandleError(c *gin.Context, err error) {
 		"status":  e.Status,
 		"code":    e.Code,
 		"message": e.Err,
+		"traceID": monitor.GetTraceID(c.Request.Context()),
 	})
 }
 

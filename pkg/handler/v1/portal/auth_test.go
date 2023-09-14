@@ -11,6 +11,7 @@ import (
 	"github.com/dwarvesf/go-api/pkg/handler/testutil"
 	"github.com/dwarvesf/go-api/pkg/handler/v1/view"
 	"github.com/dwarvesf/go-api/pkg/logger"
+	"github.com/dwarvesf/go-api/pkg/logger/monitor"
 	"github.com/dwarvesf/go-api/pkg/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -105,6 +106,7 @@ func TestHandler_Login(t *testing.T) {
 				log:      logger.NewLogger(),
 				cfg:      config.LoadTestConfig(),
 				authCtrl: ctrlMock,
+				monitor:  monitor.TestMonitor(),
 			}
 			h.Login(ginCtx)
 
@@ -173,6 +175,7 @@ func TestHandler_Signup(t *testing.T) {
 				log:      logger.NewLogger(),
 				cfg:      config.LoadTestConfig(),
 				authCtrl: ctrlMock,
+				monitor:  monitor.TestMonitor(),
 			}
 			h.Signup(ginCtx)
 			assert.Equal(t, tt.expected.Status, w.Code)
