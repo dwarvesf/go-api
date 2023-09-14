@@ -38,14 +38,14 @@ func (r *repo) Count(ctx db.Context) (int64, error) {
 
 func (r *repo) GetByID(ctx db.Context, uID int) (*model.User, error) {
 	dt, err := orm.FindUser(ctx, ctx.DB, uID)
-	return toUserModel(dt), err
+	return toUserModel(dt), base.GetOneErrorHandler(err)
 }
 
 func (r *repo) GetByEmail(ctx db.Context, email string) (*model.User, error) {
 	u, err := orm.Users(
 		orm.UserWhere.Email.EQ(email),
 	).One(ctx.Context, ctx.DB)
-	return toUserModel(u), err
+	return toUserModel(u), base.GetOneErrorHandler(err)
 }
 
 func (r *repo) Create(ctx db.Context, user model.SignupRequest) (*model.User, error) {

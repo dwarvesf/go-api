@@ -15,6 +15,9 @@ func (c impl) Login(ctx context.Context, req model.LoginRequest) (*model.LoginRe
 	dbCtx := db.FromContext(ctx)
 	user, err := c.repo.User.GetByEmail(dbCtx, req.Email)
 	if err != nil {
+		if errors.Is(err, model.ErrNotFound) {
+			return nil, model.ErrInvalidCredentials
+		}
 		return nil, errors.WithStack(err)
 	}
 
