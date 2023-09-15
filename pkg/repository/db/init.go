@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/dwarvesf/go-api/pkg/config"
+	"github.com/dwarvesf/go-api/pkg/logger/monitor"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pkg/errors"
@@ -40,6 +41,8 @@ func Init(cfg config.Config) (*sql.DB, error) {
 	if err != nil {
 		return nil, errors.WithStack(fmt.Errorf("parsing pgx config failed. err: %w", err))
 	}
+
+	connCfg.Tracer = monitor.NewDBTracer()
 
 	pool, err := sql.Open("pgx", stdlib.RegisterConnConfig(connCfg))
 	if err != nil {
