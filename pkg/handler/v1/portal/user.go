@@ -50,7 +50,7 @@ func (h Handler) Me(c *gin.Context) {
 // @Produce  json
 // @Security BearerAuth
 // @Param body body UpdateUserRequest true "Update user"
-// @Success 200 {object} User
+// @Success 200 {object} UserResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
