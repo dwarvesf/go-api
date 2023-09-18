@@ -13,6 +13,9 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+// RowsAffectedKey is a standard attribute for the number of rows affected
+var RowsAffectedKey = attribute.Key("pgx.rows_affected")
+
 type ctxKey string
 
 type traceData struct {
@@ -76,6 +79,39 @@ func (t dbTracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.Tr
 	t.log.Infof("END SQL(%dms): %s. Result: %s, Err: %+v", duration, v.sql, data.CommandTag.String(), data.Err)
 }
 
+// TraceCopyFromStart is called at the beginning of CopyFrom calls. The
+// returned context is used for the rest of the call and will be passed to
+// TraceCopyFromEnd.
+func (t dbTracer) TraceCopyFromStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceCopyFromStartData) context.Context {
+	if !trace.SpanFromContext(ctx).IsRecording() {
+		return ctx
+	}
+
+	opts := []trace.SpanStartOption{
+		trace.WithSpanKind(trace.SpanKindClient),
+		trace.WithAttributes(t.attrs...),
+		trace.WithAttributes(attribute.String("db.table", data.TableName.Sanitize())),
+	}
+
+	if conn != nil {
+		opts = append(opts, connectionAttributesFromConfig(conn.Config())...)
+	}
+
+	ctx, _ = t.tracer.Start(ctx, "copy_from "+data.TableName.Sanitize(), opts...)
+
+	return ctx
+}
+
+// TraceCopyFromEnd is called at the end of CopyFrom calls.
+func (t dbTracer) TraceCopyFromEnd(ctx context.Context, _ *pgx.Conn, data pgx.TraceCopyFromEndData) {
+	span := trace.SpanFromContext(ctx)
+	recordError(span, data.Err)
+
+	span.SetAttributes(RowsAffectedKey.Int(int(data.CommandTag.RowsAffected())))
+
+	span.End()
+}
+
 func recordError(span trace.Span, err error) {
 	if err != nil {
 		span.RecordError(err)
@@ -91,4 +127,17 @@ func makeParamsAttribute(args []any) attribute.KeyValue {
 	// Since there doesn't appear to be a standard key for this in semconv, prefix it to avoid
 	// clashing with future standard attributes.
 	return attribute.Key("pgx.query.parameters").StringSlice(ss)
+}
+
+// connectionAttributesFromConfig returns a slice of SpanStartOptions that contain
+// attributes from the given connection config.
+func connectionAttributesFromConfig(config *pgx.ConnConfig) []trace.SpanStartOption {
+	if config != nil {
+		return []trace.SpanStartOption{
+			trace.WithAttributes(attribute.String(string(semconv.NetPeerNameKey), config.Host)),
+			trace.WithAttributes(attribute.Int(string(semconv.NetPeerPortKey), int(config.Port))),
+			trace.WithAttributes(attribute.String(string(semconv.DBUserKey), config.User)),
+		}
+	}
+	return nil
 }

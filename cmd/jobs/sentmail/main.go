@@ -7,7 +7,7 @@ import (
 	"github.com/dwarvesf/go-api/pkg/config"
 	"github.com/dwarvesf/go-api/pkg/controller/user"
 	"github.com/dwarvesf/go-api/pkg/logger"
-	"github.com/dwarvesf/go-api/pkg/logger/monitor"
+	"github.com/dwarvesf/go-api/pkg/monitor"
 	"github.com/dwarvesf/go-api/pkg/repository"
 	"github.com/dwarvesf/go-api/pkg/repository/db"
 	"go.opentelemetry.io/otel/attribute"

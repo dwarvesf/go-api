@@ -7,9 +7,9 @@ import (
 
 	mocks "github.com/dwarvesf/go-api/mocks/pkg/repository/user"
 	"github.com/dwarvesf/go-api/pkg/config"
-	"github.com/dwarvesf/go-api/pkg/logger/monitor"
 	"github.com/dwarvesf/go-api/pkg/middleware"
 	"github.com/dwarvesf/go-api/pkg/model"
+	"github.com/dwarvesf/go-api/pkg/monitor"
 	"github.com/dwarvesf/go-api/pkg/repository"
 	"github.com/dwarvesf/go-api/pkg/repository/db"
 	"github.com/stretchr/testify/mock"

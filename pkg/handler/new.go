@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/dwarvesf/go-api/pkg/config"
-	"github.com/dwarvesf/go-api/pkg/logger/monitor"
+	"github.com/dwarvesf/go-api/pkg/monitor"
 	"github.com/gin-gonic/gin"
 )
 

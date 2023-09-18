@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/dwarvesf/go-api/pkg/config"
-	"github.com/dwarvesf/go-api/pkg/logger/monitor"
 	"github.com/dwarvesf/go-api/pkg/model"
+	"github.com/dwarvesf/go-api/pkg/monitor"
 	"github.com/dwarvesf/go-api/pkg/repository"
 )
 

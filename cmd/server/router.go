@@ -4,8 +4,8 @@ import (
 	"github.com/dwarvesf/go-api/docs"
 	"github.com/dwarvesf/go-api/pkg/handler"
 	"github.com/dwarvesf/go-api/pkg/handler/v1/portal"
-	"github.com/dwarvesf/go-api/pkg/logger/monitor"
 	"github.com/dwarvesf/go-api/pkg/middleware"
+	"github.com/dwarvesf/go-api/pkg/monitor"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"     // swagger embed files

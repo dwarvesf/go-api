@@ -11,8 +11,8 @@ import (
 	"github.com/dwarvesf/go-api/pkg/handler/testutil"
 	"github.com/dwarvesf/go-api/pkg/handler/v1/view"
 	"github.com/dwarvesf/go-api/pkg/logger"
-	"github.com/dwarvesf/go-api/pkg/logger/monitor"
 	"github.com/dwarvesf/go-api/pkg/model"
+	"github.com/dwarvesf/go-api/pkg/monitor"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

@@ -5,7 +5,7 @@ import (
 	"github.com/dwarvesf/go-api/pkg/controller/auth"
 	"github.com/dwarvesf/go-api/pkg/controller/user"
 	"github.com/dwarvesf/go-api/pkg/logger"
-	"github.com/dwarvesf/go-api/pkg/logger/monitor"
+	"github.com/dwarvesf/go-api/pkg/monitor"
 	"github.com/dwarvesf/go-api/pkg/repository"
 	"github.com/dwarvesf/go-api/pkg/service"
 )
