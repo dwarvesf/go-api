@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 
 	mw "github.com/dwarvesf/go-api/pkg/middleware"
@@ -32,7 +31,7 @@ var defaultHeaders = map[string]string{
 }
 
 // GinContext init a gin context for testing
-func GinContext(w *httptest.ResponseRecorder) *gin.Context {
+func GinContext(w http.ResponseWriter) *gin.Context {
 	gin.SetMode(gin.TestMode)
 
 	ctx, _ := gin.CreateTestContext(w)
@@ -55,7 +54,7 @@ func updateHeaders(ctx *gin.Context, headers map[string]string) {
 }
 
 // NewRequest make a gin.Context request
-func NewRequest(w *httptest.ResponseRecorder, method HTTPMethod, headers map[string]string, params []gin.Param, u url.Values, body interface{}) *gin.Context {
+func NewRequest(w http.ResponseWriter, method HTTPMethod, headers map[string]string, params []gin.Param, u url.Values, body interface{}) *gin.Context {
 	ctx := GinContext(w)
 
 	ctx.Request.Method = string(method)

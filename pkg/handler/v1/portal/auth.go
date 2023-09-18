@@ -12,6 +12,7 @@ import (
 // Login godoc
 // @Summary Login to portal
 // @Description Login to portal by email
+// @id login
 // @Tags Auth
 // @Accept  json
 // @Produce  json
@@ -54,6 +55,7 @@ func (h Handler) Login(c *gin.Context) {
 // Signup godoc
 // @Summary Signup
 // @Description Signup
+// @id signup
 // @Tags Auth
 // @Accept  json
 // @Produce  json

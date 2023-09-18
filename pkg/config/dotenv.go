@@ -20,6 +20,6 @@ func (r *dotenv) Load(v viper.Viper) (*viper.Viper, error) {
 	if err != nil {
 		return nil, err
 	}
-	v.AutomaticEnv()
+
 	return &v, nil
 }

@@ -7,10 +7,18 @@ import (
 	"io"
 )
 
-type implSha512 struct{}
+type implSha512 struct {
+	saltLength uint32
+}
+
+func newSha512Default() *implSha512 {
+	return &implSha512{
+		saltLength: 32,
+	}
+}
 
 func (h implSha512) GenerateSalt() string {
-	var salt = make([]byte, saltSize)
+	var salt = make([]byte, h.saltLength)
 
 	_, err := io.ReadFull(rand.Reader, salt)
 

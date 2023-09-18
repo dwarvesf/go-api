@@ -6,6 +6,9 @@ import (
 	"github.com/dwarvesf/go-api/pkg/handler/v1/portal"
 	"github.com/dwarvesf/go-api/pkg/logger/monitor"
 	"github.com/dwarvesf/go-api/pkg/middleware"
+	"github.com/dwarvesf/go-api/pkg/realtime"
+	"github.com/dwarvesf/go-api/pkg/service/jwthelper"
+	"github.com/dwarvesf/go-api/pkg/util"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"     // swagger embed files
@@ -71,12 +74,27 @@ func publicHandler(r *gin.Engine, a App) {
 		portalGroup.POST("/auth/login", portalHandler.Login)
 		portalGroup.POST("/auth/signup", portalHandler.Signup)
 	}
+
+	apiV1.GET("/sse", realtime.SSEHeadersMiddleware(), func(c *gin.Context) {
+		u, err := a.realtimeServer.HandleConnection(c)
+		if err != nil {
+			a.l.Error(err, "failed to handle connection")
+			util.HandleError(c, err)
+			return
+		}
+
+		a.l.Infof("user %s connected", u.ID)
+		a.realtimeServer.HandleEvent(c, *u, func(ginCtx *gin.Context, data any) error {
+			a.l.Infof("data received: %v", data)
+			return nil
+		})
+	})
 }
 
 func authenticatedHandler(r *gin.Engine, a App) {
 
 	// api/v1
-	authMw := middleware.NewAuthMiddleware(a.cfg.SecretKey)
+	authMw := middleware.NewAuthMiddleware(jwthelper.NewHelper(a.cfg.SecretKey))
 	apiV1 := r.Group("/api/v1")
 	apiV1.Use(authMw.WithAuth)
 	portalGroup := apiV1.Group("/portal")

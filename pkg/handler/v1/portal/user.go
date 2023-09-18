@@ -12,6 +12,7 @@ import (
 // Me godoc
 // @Summary Retrieve my information
 // @Description Retrieve my information
+// @id getMe
 // @Tags User
 // @Accept  json
 // @Produce  json
@@ -43,6 +44,7 @@ func (h Handler) Me(c *gin.Context) {
 // UpdateUser godoc
 // @Summary Update user
 // @Description Update user
+// @id updateUser
 // @Tags User
 // @Accept  json
 // @Produce  json
@@ -89,6 +91,7 @@ func (h Handler) UpdateUser(c *gin.Context) {
 // UpdatePassword godoc
 // @Summary Update user's password
 // @Description Update user's password
+// @id updatePassword
 // @Tags User
 // @Accept  json
 // @Produce  json

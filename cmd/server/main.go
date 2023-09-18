@@ -12,9 +12,12 @@ import (
 	"github.com/dwarvesf/go-api/pkg/config"
 	"github.com/dwarvesf/go-api/pkg/logger"
 	"github.com/dwarvesf/go-api/pkg/logger/monitor"
+	"github.com/dwarvesf/go-api/pkg/middleware"
+	"github.com/dwarvesf/go-api/pkg/realtime"
 	"github.com/dwarvesf/go-api/pkg/repository"
 	"github.com/dwarvesf/go-api/pkg/repository/db"
 	"github.com/dwarvesf/go-api/pkg/service"
+	"github.com/dwarvesf/go-api/pkg/service/jwthelper"
 )
 
 // @title           APP API DOCUMENT
@@ -45,12 +48,14 @@ func main() {
 	l := logger.NewLogByConfig(cfg)
 	l.Infof("Server starting")
 
+	authMw := middleware.NewAuthMiddleware(jwthelper.NewHelper(cfg.SecretKey))
 	a := App{
-		l:       l,
-		cfg:     cfg,
-		service: service.New(cfg),
-		repo:    repository.NewRepo(),
-		monitor: sMonitor,
+		l:              l,
+		cfg:            cfg,
+		service:        service.New(cfg),
+		repo:           repository.NewRepo(),
+		monitor:        sMonitor,
+		realtimeServer: realtime.New(authMw, l),
 	}
 
 	_, err = db.Init(*cfg)
@@ -94,9 +99,10 @@ func shutdownServer(srv *http.Server, l logger.Log) {
 
 // App api app instance
 type App struct {
-	l       logger.Log
-	cfg     *config.Config
-	service service.Service
-	repo    *repository.Repo
-	monitor monitor.Tracer
+	l              logger.Log
+	cfg            *config.Config
+	service        service.Service
+	repo           *repository.Repo
+	monitor        monitor.Tracer
+	realtimeServer realtime.Server
 }
