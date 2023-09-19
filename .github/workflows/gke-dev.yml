@@ -12,7 +12,7 @@ env:
   GIT_USER: lmquang
   GIT_EMAIL: quanglm.ops@gmail.com
   REGISTRY_HOSTNAME: gcr.io
-  GKE_PROJECT: <gcp-project-id>
+  GKE_PROJECT: df-infrastructure
   APP: go-api
   IMAGE: go-api
 
@@ -23,6 +23,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get files that have changed
+        id: changed-files-yaml
+        uses: tj-actions/changed-files@v39
+        with:
+          files_yaml: |
+            code:
+              - cmd/**
+              - migrations/**
+              - mocks/**
+              - pkg/**
+            k8s:
+              - k8s/**
 
       # Setup gcloud CLI
       - id: "auth"
@@ -31,6 +46,7 @@ jobs:
         with:
           credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
       - name: "Set up Cloud SDK"
+        if: steps.changed-files-yaml.outputs.code_any_changed == 'true' 
         uses: "google-github-actions/setup-gcloud@v0"
 
       # Setup Docker
@@ -38,21 +54,25 @@ jobs:
         run: |
           gcloud auth configure-docker gcr.io
       - name: Cache Docker images
+        if: steps.changed-files-yaml.outputs.code_any_changed == 'true' 
         uses: ScribeMD/docker-cache@0.3.6
         with:
           key: docker-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
       - name: Build and push
+        if: steps.changed-files-yaml.outputs.code_any_changed == 'true' 
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: ${{ env.REGISTRY_HOSTNAME }}/${{ env.GKE_PROJECT }}/${{ env.APP }}/${{ env.IMAGE }}:${{ github.sha }}
-    
+
       - uses: imranismail/setup-kustomize@v2
+        if: steps.changed-files-yaml.outputs.code_any_changed == 'true' || steps.changed-files-yaml.outputs.k8s_any_changed == 'true'
         with:
           kustomize-version: "5.1.1"
           github-token: ${{ secrets.GH_PAT }}
       - name: Generate kustomize resources
+        if: steps.changed-files-yaml.outputs.code_any_changed == 'true' || steps.changed-files-yaml.outputs.k8s_any_changed == 'true'
         run: |
           cd ./k8s/$K8S_ENVIRONMENT
           kustomize edit set image $REGISTRY_HOSTNAME/$GKE_PROJECT/$APP/$IMAGE=$REGISTRY_HOSTNAME/$GKE_PROJECT/$APP/$IMAGE:${GITHUB_SHA}
@@ -60,6 +80,7 @@ jobs:
 
       # Make sure the infrastructure repo is set up
       - name: Checkout dwarvesf/infrastructure
+        if: steps.changed-files-yaml.outputs.code_any_changed == 'true' || steps.changed-files-yaml.outputs.k8s_any_changed == 'true'
         uses: actions/checkout@master
         with:
           repository: dwarvesf/infrastructure
@@ -67,6 +88,7 @@ jobs:
           path: ./infrastructure
           ref: main
       - name: Update app version
+        if: steps.changed-files-yaml.outputs.code_any_changed == 'true' || steps.changed-files-yaml.outputs.k8s_any_changed == 'true'
         run: |
           cd ./infrastructure/$APP/$K8S_ENVIRONMENT
           git config user.name $GIT_USER
